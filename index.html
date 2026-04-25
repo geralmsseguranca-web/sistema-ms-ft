@@ -427,9 +427,24 @@
                             <option value="Falta de Efetivo">Falta de Efetivo</option>
                             <option value="Treinamento">Treinamento</option>
                             <option value="Remanejamento Interno">Remanejamento Interno</option>
+                            <option value="Extra">Extra</option>
                         </select>
                     </div>
-                    <div class="input-group"><label><i class="fas fa-clock"></i> Horário</label><select id="horarioSelect" required><option value="">-- Selecione --</option><option value="18:00 às 06:00">18:00 às 06:00</option><option value="06:00 às 18:00">06:00 às 18:00</option><option value="07:00 às 17:00">07:00 às 17:00</option><option value="22:00 às 07:20">22:00 às 07:20</option></select></div>
+                    <div class="input-group">
+                        <label><i class="fas fa-clock"></i> Horário</label>
+                        <select id="horarioSelect" required>
+                            <option value="">-- Selecione --</option>
+                            <option value="18:00 às 06:00">18:00 às 06:00</option>
+                            <option value="06:00 às 18:00">06:00 às 18:00</option>
+                            <option value="07:00 às 17:00">07:00 às 17:00</option>
+                            <option value="22:00 às 07:20">22:00 às 07:20</option>
+                            <option value="A definir">A definir (horário em aberto)</option>
+                            <option value="Outro">Outro (especificar)</option>
+                        </select>
+                        <div id="ftHorarioOutroGrupo" style="display:none; margin-top:8px;">
+                            <input type="text" id="ftHorarioOutro" placeholder="Ex: 08:00 às 16:00 ou horário a confirmar">
+                        </div>
+                    </div>
                     <div class="input-group"><label><i class="fas fa-user-check"></i> Quem está indo (Substituto)</label><select id="plantaoSelect" required><option value="">-- Selecione --</option></select></div>
                     <div class="input-group" id="grupoFaltou">
                         <label><i class="fas fa-user-slash"></i> Quem faltou (Substituído)</label>
@@ -591,6 +606,83 @@
     </div>
     <!-- ABA 6 - BICO FIXO -->
     <div id="tab-bicofixo" class="tab-content">
+
+        <!-- DASHBOARD BICO FIXO -->
+        <div class="card" id="bicoDashboardCard">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-bar"></i> Dashboard — Bico Fixo</h2>
+                <span class="badge-status" id="bicoDashTotalBadge">0 registros</span>
+            </div>
+            <div class="dashboard-cards" id="bicoDashCards">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="stat-value" id="bicoDashTotal">0</div>
+                    <div class="stat-label">Total de Registros</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:var(--green)"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-value" id="bicoDashValor">R$ 0,00</div>
+                    <div class="stat-label">Valor Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#7aaeff"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="bicoDashFuncionarios">0</div>
+                    <div class="stat-label">Funcionários Diferentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#f97316"><i class="fas fa-building"></i></div>
+                    <div class="stat-value" id="bicoDashPostos">0</div>
+                    <div class="stat-label">Postos Atendidos</div>
+                </div>
+            </div>
+
+            <!-- FILTROS DO DASHBOARD BICO FIXO -->
+            <div class="filter-bar" style="margin-top:8px;">
+                <div class="input-group">
+                    <label><i class="fas fa-calendar-alt"></i> Data Início</label>
+                    <input type="date" id="bicoFiltroInicio">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-calendar-alt"></i> Data Fim</label>
+                    <input type="date" id="bicoFiltroFim">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-clock"></i> Horário</label>
+                    <select id="bicoFiltroHorario">
+                        <option value="">Todos os horários</option>
+                        <option value="18:00 às 06:00">18:00 às 06:00</option>
+                        <option value="06:00 às 18:00">06:00 às 18:00</option>
+                        <option value="07:00 às 17:00">07:00 às 17:00</option>
+                        <option value="18:00 às 08:30">18:00 às 08:30</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Funcionário</label>
+                    <select id="bicoFiltroFuncionario">
+                        <option value="">Todos os funcionários</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-building"></i> Posto</label>
+                    <select id="bicoFiltroPosto">
+                        <option value="">Todos os postos</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="filtrarAtualizarBicoDash()"><i class="fas fa-search"></i> Filtrar</button>
+                    <button class="btn-secondary" onclick="limparFiltrosBico()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+
+            <!-- BOTÕES DE RELATÓRIO BICO FIXO -->
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; align-items:center;">
+                <span style="font-size:0.8rem; color:var(--text-sub); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-file-export"></i> Exportar Relatório:</span>
+                <button class="btn-success" onclick="exportarBicoCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn-success" onclick="exportarBicoExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-success" onclick="exportarBicoPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h2><i class="fas fa-user-tie"></i> Novo Registro de Bico Fixo</h2>
@@ -872,6 +964,9 @@
 
         const fc = document.getElementById("filterColaborador");
         if(fc) fc.innerHTML = '<option value="">Todos os colaboradores</option>' + employees.map(e=>`<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+
+        // Atualiza filtros do dashboard Bico Fixo
+        if(typeof updateBicoFiltroSelects === 'function') updateBicoFiltroSelects();
     }
 
     function setupMotivoListener() {
@@ -1015,13 +1110,16 @@
         e.preventDefault();
         const postoId    = parseInt(document.getElementById("postoSelect").value);
         const motivo     = document.getElementById("motivoSelect").value;
-        const horario    = document.getElementById("horarioSelect").value;
+        const horSel     = document.getElementById("horarioSelect").value;
+        const horario    = horSel === "Outro"
+            ? (document.getElementById("ftHorarioOutro").value.trim() || "A definir")
+            : horSel;
         const plantaoId  = parseInt(document.getElementById("plantaoSelect").value);
         let   faltouId   = parseInt(document.getElementById("faltouSelect").value);
         const valor      = parseFloat(document.getElementById("valorPago").value);
         const dataHora   = document.getElementById("dataHoraEvento").value;
 
-        if(!postoId||!motivo||!horario||isNaN(plantaoId)||isNaN(valor)||!dataHora) { alert("Preencha todos os campos obrigatórios"); return; }
+        if(!postoId||!motivo||!horSel||isNaN(plantaoId)||isNaN(valor)||!dataHora) { alert("Preencha todos os campos obrigatórios"); return; }
 
         const isOpcional = motivosSemSubstituto.includes(motivo);
         if(!isOpcional && (isNaN(faltouId)||!faltouId)) { alert(`Para o motivo "${motivo}", é obrigatório informar quem faltou.`); return; }
@@ -1374,7 +1472,7 @@
                 if(tab==="tab-reports")   atualizarDashboard();
                 else if(tab==="tab-ft")   setDefaultDateTime();
                 else if(tab==="tab-mov")  setDefaultMovDateTime();
-                else if(tab==="tab-bicofixo") setDefaultBicoData();
+                else if(tab==="tab-bicofixo") { setDefaultBicoData(); updateBicoFiltroSelects(); filtrarAtualizarBicoDash(); }
                 else if(tab==="tab-atestados") { updateAtestadoSelect(); updateAtestadoFilterColaborador(); renderAtestadoTable(); resetAtestadoForm(); }
             });
         });
@@ -1761,6 +1859,7 @@
     function uiInit() {
         initTabs();
         setupMotivoListener();
+        setupFtHorarioListener();
         setupBicoHorarioListener();
         setupBicoValorListener();
         setDefaultDateTime();
@@ -1792,6 +1891,205 @@
         document.getElementById("openAddEmployeeModal")?.addEventListener("click",()=>{ const n=prompt("Nome do funcionário:"); if(n?.trim()) addEmployee(n.trim()); });
         document.getElementById("openAddPostoModal")?.addEventListener("click",()=>{ const n=prompt("Nome do posto:"); if(n?.trim()) addPosto(n.trim()); });
     }
+
+    // ── LISTENER HORÁRIO FT (campo livre) ──
+    function setupFtHorarioListener() {
+        const sel = document.getElementById("horarioSelect");
+        const grp = document.getElementById("ftHorarioOutroGrupo");
+        if(!sel || !grp) return;
+        sel.addEventListener("change", () => {
+            grp.style.display = (sel.value === "Outro") ? "block" : "none";
+            const inp = document.getElementById("ftHorarioOutro");
+            if(inp) { inp.required = sel.value === "Outro"; }
+        });
+    }
+
+    // ── BICO FIXO DASHBOARD ──
+    function updateBicoFiltroSelects() {
+        const sf = document.getElementById("bicoFiltroFuncionario");
+        if(sf) {
+            const cur = sf.value;
+            sf.innerHTML = '<option value="">Todos os funcionários</option>' + employees.map(e=>`<option value="${e.id}"${String(e.id)===cur?' selected':''}>${escapeHtml(e.name)}</option>`).join('');
+        }
+        const sp = document.getElementById("bicoFiltroPosto");
+        if(sp) {
+            const cur2 = sp.value;
+            sp.innerHTML = '<option value="">Todos os postos</option>' + postos.map(p=>`<option value="${p.id}"${String(p.id)===cur2?' selected':''}>${escapeHtml(p.nome)}</option>`).join('');
+        }
+    }
+
+    function getBicoFiltrados() {
+        const inicio    = document.getElementById("bicoFiltroInicio")?.value || "";
+        const fim       = document.getElementById("bicoFiltroFim")?.value || "";
+        const horario   = document.getElementById("bicoFiltroHorario")?.value || "";
+        const empId     = parseInt(document.getElementById("bicoFiltroFuncionario")?.value) || 0;
+        const postoId   = parseInt(document.getElementById("bicoFiltroPosto")?.value) || 0;
+
+        let lista = [...bicoRecords];
+        if(inicio) lista = lista.filter(b => b.data >= inicio);
+        if(fim)    lista = lista.filter(b => b.data <= fim);
+        if(horario) lista = lista.filter(b => b.horario === horario);
+        if(empId)  lista = lista.filter(b => b.empId === empId);
+        if(postoId) lista = lista.filter(b => b.postoId === postoId);
+        return lista;
+    }
+
+    function filtrarAtualizarBicoDash() {
+        const lista = getBicoFiltrados();
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+
+        const total = lista.length;
+        const valor = lista.reduce((s,b)=>s+(b.valor||0),0);
+        const funcs = new Set(lista.map(b=>b.empId)).size;
+        const pts   = new Set(lista.map(b=>b.postoId)).size;
+
+        const elT = document.getElementById("bicoDashTotal");     if(elT) elT.textContent = total;
+        const elV = document.getElementById("bicoDashValor");     if(elV) elV.textContent = "R$ "+valor.toFixed(2).replace('.',',');
+        const elF = document.getElementById("bicoDashFuncionarios"); if(elF) elF.textContent = funcs;
+        const elP = document.getElementById("bicoDashPostos");    if(elP) elP.textContent = pts;
+        const badge = document.getElementById("bicoDashTotalBadge"); if(badge) badge.innerHTML = `${total} registro(s)`;
+
+        // Atualiza histórico filtrado
+        renderBicoFixoTableFiltrado(lista, empMap, postoMap);
+    }
+
+    function limparFiltrosBico() {
+        const ids = ["bicoFiltroInicio","bicoFiltroFim","bicoFiltroHorario","bicoFiltroFuncionario","bicoFiltroPosto"];
+        ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ""; });
+        filtrarAtualizarBicoDash();
+    }
+
+    function renderBicoFixoTableFiltrado(lista, empMap, postoMap) {
+        const tbody = document.getElementById("bicoFixoTableBody");
+        if(!tbody) return;
+        tbody.innerHTML = lista.length ? lista.map(b => `<tr>
+            <td><strong>${escapeHtml(empMap.get(b.empId)||'?')}</strong></td>
+            <td>${escapeHtml(postoMap.get(b.postoId)||'?')}</td>
+            <td>${b.data||'---'}</td>
+            <td>${escapeHtml(b.horario)}</td>
+            <td style="color:var(--green);font-weight:600;">R$ ${(b.valor||0).toFixed(2)}</td>
+            <td class="action-icons"><i class="fas fa-trash-alt" onclick="deleteBicoFixo(${b.id})" title="Excluir"></i></td>
+        </tr>`).join('') : '<tr class="empty-row"><td colspan="6">Nenhum registro encontrado</td></tr>';
+        const cnt = document.getElementById("totalBicoCount");
+        if(cnt) cnt.innerHTML = `${lista.length} registro(s)`;
+    }
+
+    function renderBicoTable() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        filtrarAtualizarBicoDash();
+        updateBicoFiltroSelects();
+    }
+
+    // ── EXPORTAR BICO FIXO ──
+    function exportarBicoCSV() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const lista = getBicoFiltrados();
+        const dados = [['Funcionário','Posto','Data','Horário','Valor (R$)']];
+        lista.forEach(b => dados.push([
+            empMap.get(b.empId)||'?',
+            postoMap.get(b.postoId)||'?',
+            b.data||'',
+            b.horario||'',
+            (b.valor||0).toFixed(2)
+        ]));
+        const csv = dados.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`bico_fixo_${Date.now()}.csv`; a.click();
+    }
+
+    function exportarBicoExcel() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const lista = getBicoFiltrados();
+        const wsData = [['Funcionário','Posto','Data','Horário','Valor (R$)']];
+        lista.forEach(b => wsData.push([
+            empMap.get(b.empId)||'?',
+            postoMap.get(b.postoId)||'?',
+            b.data||'',
+            b.horario||'',
+            b.valor||0
+        ]));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Bico Fixo');
+        XLSX.writeFile(wb, `bico_fixo_${Date.now()}.xlsx`);
+    }
+
+    async function exportarBicoPDF() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const lista = getBicoFiltrados();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),20,'F');
+        doc.setTextColor(247,179,43);
+        doc.setFontSize(14); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Relatório de Bico Fixo', 14, 13);
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text(`Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 13, {align:'right'});
+
+        // Sumário
+        const totalValor = lista.reduce((s,b)=>s+(b.valor||0),0);
+        doc.setFillColor(22,29,46);
+        doc.rect(0,22,doc.internal.pageSize.getWidth(),12,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(9); doc.setFont(undefined,'bold');
+        doc.text(`Total de Registros: ${lista.length}`, 14, 30);
+        doc.text(`Valor Total: R$ ${totalValor.toFixed(2)}`, pw/2+14, 30, {align:'center'});
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 30, {align:'right'});
+
+        const headers = ['Funcionário','Posto','Data','Horário','Valor (R$)'];
+        const colW    = [70, 60, 30, 50, 0];
+        const totalFixed = colW.slice(0,-1).reduce((a,b)=>a+b,0);
+        colW[4] = pw - totalFixed;
+        const startX = 14;
+        let y = 40;
+
+        doc.setFillColor(30,64,112);
+        doc.rect(startX, y, pw, 8, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+        let cx = startX + 2;
+        headers.forEach((h,i) => { doc.text(h, cx, y+5.5); cx += colW[i]; });
+        y += 8;
+
+        lista.forEach((b, idx) => {
+            const rowH = 9;
+            if(y + rowH > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            const bg = idx % 2 === 0 ? [17,24,39] : [22,29,46];
+            doc.setFillColor(...bg);
+            doc.rect(startX, y, pw, rowH, 'F');
+            doc.setTextColor(220,230,240); doc.setFontSize(7); doc.setFont(undefined,'normal');
+            cx = startX + 2;
+            const row = [
+                empMap.get(b.empId)||'?',
+                postoMap.get(b.postoId)||'?',
+                b.data||'—',
+                b.horario||'—',
+                'R$ '+(b.valor||0).toFixed(2)
+            ];
+            row.forEach((v,i) => { doc.text(String(v), cx, y+6, {maxWidth:colW[i]-3}); cx += colW[i]; });
+            doc.setDrawColor(45,92,166,0.3);
+            doc.line(startX, y+rowH, startX+pw, y+rowH);
+            y += rowH;
+        });
+
+        if(lista.length) {
+            y += 4;
+            doc.setFillColor(30,64,112);
+            doc.rect(startX, y, pw, 9, 'F');
+            doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont(undefined,'bold');
+            doc.text('VALOR TOTAL:', startX+2, y+6);
+            doc.setTextColor(52,211,153);
+            doc.text('R$ '+totalValor.toFixed(2), startX+40, y+6);
+        }
+
+        doc.save(`bico_fixo_${Date.now()}.pdf`);
+    }
 </script>
 </body>
 </html>
+
