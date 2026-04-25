@@ -3,9 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Grupo MS Segurança | Sistema Integrado FT ↔ Movimentações v1.9</title>
+    <title>Grupo MS Segurança | Sistema Integrado FT ↔ Movimentações v2.1 Cloud</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore, collection, doc, setDoc, deleteDoc,
+        onSnapshot, query, orderBy, getDocs
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      // ══════════════════════════════════════════════════
+      // 🔧 CONFIGURAÇÃO DO FIREBASE — substitua pelos seus
+      // ══════════════════════════════════════════════════
+      const firebaseConfig = {
+        apiKey:            "COLE_SEU_API_KEY_AQUI",
+        authDomain:        "COLE_SEU_AUTH_DOMAIN_AQUI",
+        projectId:         "COLE_SEU_PROJECT_ID_AQUI",
+        storageBucket:     "COLE_SEU_STORAGE_BUCKET_AQUI",
+        messagingSenderId: "COLE_SEU_MESSAGING_SENDER_ID_AQUI",
+        appId:             "COLE_SEU_APP_ID_AQUI"
+      };
+      // ══════════════════════════════════════════════════
+
+      const app = initializeApp(firebaseConfig);
+      const db  = getFirestore(app);
+
+      // Expõe db e helpers para o script principal
+      window._firestore = {
+        db,
+        collection, doc, setDoc, deleteDoc,
+        onSnapshot, query, orderBy, getDocs
+      };
+
+      // Sinaliza que o Firebase está pronto
+      window.dispatchEvent(new Event("firebase-ready"));
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -94,6 +128,9 @@
             border: 1px solid var(--border-glow);
         }
         .sync-badge { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.3); }
+        .sync-badge.connecting { background: rgba(247,179,43,0.1); color: #f7b32b; border-color: rgba(247,179,43,0.3); animation: pulse 1.5s infinite; }
+        .sync-badge.error { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
         /* ── TABS ── */
         .tabs { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -353,7 +390,7 @@
                 <p>Excelência em Proteção e Gestão Operacional</p>
             </div>
         </div>
-        <div class="badge-ms sync-badge"><i class="fas fa-sync-alt"></i>&nbsp; Comunicação Bidirecional</div>
+        <div id="firebaseBadge" class="badge-ms sync-badge connecting"><i class="fas fa-cloud"></i>&nbsp; Conectando ao Firebase…</div>
     </div>
 
     <div class="tabs">
@@ -717,39 +754,106 @@
     </div>
 </div>
 <script>
-    // ===================== BANCO DE DADOS =====================
+    // ══════════════════════════════════════════════════════════
+    //  SISTEMA INTEGRADO COM FIREBASE FIRESTORE  v2.1
+    //  Dados compartilhados em tempo real entre múltiplas máquinas
+    // ══════════════════════════════════════════════════════════
+
     let employees = [], postos = [], ftRecords = [], movRecords = [], bicoRecords = [], atestadoRecords = [];
     let nextEmpId = 1, nextPostoId = 1, nextFtId = 1, nextMovId = 1, nextBicoId = 1;
     let ftChart = null, movChart = null;
+
+    // Referências Firestore (preenchidas após firebase-ready)
+    let db, FS;
+    let _unsubscribers = [];
 
     const motivosSemSubstituto = ["Falta de Efetivo", "Treinamento"];
 
     // Paleta de cores para os gráficos (tema escuro)
     const CHART_COLORS = ['#3a74cc','#f7b32b','#10b981','#ef4444','#8b5cf6','#06b6d4','#f59e0b'];
 
-    function loadData() {
-        employees = JSON.parse(localStorage.getItem("ms_employees") || '[{"id":1,"name":"João Silva"},{"id":2,"name":"Maria Oliveira"},{"id":3,"name":"Carlos Santos"},{"id":4,"name":"Roberto Almeida"}]');
-        postos = JSON.parse(localStorage.getItem("ms_postos") || '[{"id":1,"nome":"Condomínio Barra Tower"},{"id":2,"nome":"Empresa Alpha"},{"id":3,"nome":"Centro Logístico"}]');
-        ftRecords = JSON.parse(localStorage.getItem("ms_ft_records") || '[]');
-        movRecords = JSON.parse(localStorage.getItem("ms_mov_records") || '[]');
-        bicoRecords = JSON.parse(localStorage.getItem("ms_bico_records") || '[]');
-
-        const storedNext = JSON.parse(localStorage.getItem("ms_next_ids") || '{}');
-        nextEmpId   = storedNext.nextEmpId   || (employees.length ? Math.max(...employees.map(e=>e.id))+1 : 1);
-        nextPostoId = storedNext.nextPostoId || (postos.length ? Math.max(...postos.map(p=>p.id))+1 : 1);
-        nextFtId    = storedNext.nextFtId    || (ftRecords.length ? Math.max(...ftRecords.map(f=>f.id))+1 : 1);
-        nextMovId   = storedNext.nextMovId   || (movRecords.length ? Math.max(...movRecords.map(m=>m.id))+1 : 1);
-        nextBicoId  = storedNext.nextBicoId  || (bicoRecords.length ? Math.max(...bicoRecords.map(b=>b.id))+1 : 1);
+    // ── STATUS BADGE ──
+    function setBadge(state) {
+        const b = document.getElementById("firebaseBadge");
+        if(!b) return;
+        b.className = "badge-ms sync-badge" + (state === "ok" ? "" : state === "error" ? " error" : " connecting");
+        const icons = { ok:"fa-cloud-upload-alt", error:"fa-exclamation-triangle", connecting:"fa-cloud" };
+        const msgs  = { ok:"Firebase Conectado ✓", error:"Erro de Conexão", connecting:"Conectando…" };
+        b.innerHTML = `<i class="fas ${icons[state]}"></i>&nbsp; ${msgs[state]}`;
     }
 
-    function saveAll() {
-        localStorage.setItem("ms_employees",  JSON.stringify(employees));
-        localStorage.setItem("ms_postos",     JSON.stringify(postos));
-        localStorage.setItem("ms_ft_records", JSON.stringify(ftRecords));
-        localStorage.setItem("ms_mov_records",JSON.stringify(movRecords));
-        localStorage.setItem("ms_bico_records",JSON.stringify(bicoRecords));
-        localStorage.setItem("ms_next_ids",   JSON.stringify({ nextEmpId, nextPostoId, nextFtId, nextMovId, nextBicoId }));
+    // ── HELPERS FIRESTORE ──
+    function colRef(name) { return FS.collection(db, name); }
+    function docRef(colName, id) { return FS.doc(db, colName, String(id)); }
+
+    async function fsSet(colName, id, data) {
+        try {
+            await FS.setDoc(docRef(colName, id), data);
+            setBadge("ok");
+        } catch(e) { console.error("fsSet error:", e); setBadge("error"); }
     }
+
+    async function fsDel(colName, id) {
+        try {
+            await FS.deleteDoc(docRef(colName, id));
+        } catch(e) { console.error("fsDel error:", e); setBadge("error"); }
+    }
+
+    // Recalcula nextId a partir de um array de registros
+    function calcNext(arr, field="id") {
+        return arr.length ? Math.max(...arr.map(r => r[field] || 0)) + 1 : 1;
+    }
+
+    // ── LISTENERS EM TEMPO REAL ──
+    function startListeners() {
+        const sub = FS.onSnapshot;
+
+        _unsubscribers.push(sub(colRef("employees"), snap => {
+            employees = snap.docs.map(d => d.data());
+            nextEmpId = calcNext(employees);
+            renderEmployeeTable(); updateSelects(); updateAtestadoSelect(); atualizarDashboard();
+        }));
+
+        _unsubscribers.push(sub(colRef("postos"), snap => {
+            postos = snap.docs.map(d => d.data());
+            nextPostoId = calcNext(postos);
+            renderPostoTable(); updateSelects(); atualizarDashboard();
+        }));
+
+        _unsubscribers.push(sub(colRef("ftRecords"), snap => {
+            ftRecords = snap.docs.map(d => d.data());
+            nextFtId = calcNext(ftRecords);
+            renderFtTable(); atualizarDashboard();
+        }));
+
+        _unsubscribers.push(sub(colRef("movRecords"), snap => {
+            movRecords = snap.docs.map(d => d.data());
+            nextMovId = calcNext(movRecords);
+            renderMovTable(); atualizarDashboard();
+        }));
+
+        _unsubscribers.push(sub(colRef("bicoRecords"), snap => {
+            bicoRecords = snap.docs.map(d => d.data());
+            nextBicoId = calcNext(bicoRecords);
+            renderBicoTable?.(); atualizarDashboard();
+        }));
+
+        _unsubscribers.push(sub(colRef("atestadoRecords"), snap => {
+            atestadoRecords = snap.docs.map(d => d.data());
+            nextAtestadoId = calcNext(atestadoRecords);
+            renderAtestadoTable(); atualizarDashboard();
+            const cnt = document.getElementById("totalAtestadoCount");
+            if(cnt) cnt.innerHTML = `${atestadoRecords.length} registro(s)`;
+        }));
+
+        setBadge("ok");
+    }
+
+    // Compatibilidade: saveAll agora é no-op (Firestore é a fonte de verdade)
+    function saveAll() { /* dados salvos diretamente no Firestore */ }
+
+    // loadData legado — não usado com Firestore, mantido para compatibilidade de funções auxiliares
+    function loadData() {}
 
     function updateSelects() {
         const empHtml = '<option value="">-- Selecione --</option>' + employees.map(e=>`<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
@@ -878,27 +982,35 @@
     window.editEmployee = id => {
         const emp = employees.find(e=>e.id===id); if(!emp) return;
         const n = prompt("Editar nome:", emp.name);
-        if(n && n.trim()) { emp.name=n.trim(); saveAll(); renderEmployeeTable(); updateSelects(); renderFtTable(); renderMovTable(); atualizarDashboard(); }
+        if(n && n.trim()) { emp.name=n.trim(); fsSet("employees", emp.id, emp); }
     };
     window.deleteEmployee = id => {
         if(ftRecords.some(f=>f.plantaoId===id||f.faltouId===id)||movRecords.some(m=>m.quemSaiuId===id||m.quemEntrouId===id)) { alert("❌ Funcionário possui vínculos"); return; }
-        if(confirm("Excluir funcionário?")) { employees=employees.filter(e=>e.id!==id); saveAll(); renderEmployeeTable(); updateSelects(); renderFtTable(); renderMovTable(); atualizarDashboard(); }
+        if(confirm("Excluir funcionário?")) { fsDel("employees", id); }
     };
-    function addEmployee(name) { if(!name.trim()) return; employees.push({id:nextEmpId++,name:name.trim()}); saveAll(); renderEmployeeTable(); updateSelects(); updateAtestadoSelect(); atualizarDashboard(); }
+    function addEmployee(name) {
+        if(!name.trim()) return;
+        const emp = {id: nextEmpId++, name: name.trim()};
+        fsSet("employees", emp.id, emp);
+    }
 
     window.editPosto = id => {
         const p = postos.find(p=>p.id===id); if(!p) return;
         const n = prompt("Editar posto:", p.nome);
-        if(n && n.trim()) { p.nome=n.trim(); saveAll(); renderPostoTable(); updateSelects(); renderFtTable(); renderMovTable(); atualizarDashboard(); }
+        if(n && n.trim()) { p.nome=n.trim(); fsSet("postos", p.id, p); }
     };
     window.deletePosto = id => {
         if(ftRecords.some(f=>f.postoId===id)||movRecords.some(m=>m.postoId===id)) { alert("❌ Posto possui vínculos"); return; }
-        if(confirm("Excluir posto?")) { postos=postos.filter(p=>p.id!==id); saveAll(); renderPostoTable(); updateSelects(); atualizarDashboard(); }
+        if(confirm("Excluir posto?")) { fsDel("postos", id); }
     };
-    function addPosto(nome) { if(!nome.trim()) return; postos.push({id:nextPostoId++,nome:nome.trim()}); saveAll(); renderPostoTable(); updateSelects(); atualizarDashboard(); }
+    function addPosto(nome) {
+        if(!nome.trim()) return;
+        const p = {id: nextPostoId++, nome: nome.trim()};
+        fsSet("postos", p.id, p);
+    }
 
     /* ── REGISTER FT ── */
-    function registerFt(e) {
+    async function registerFt(e) {
         e.preventDefault();
         const postoId    = parseInt(document.getElementById("postoSelect").value);
         const motivo     = document.getElementById("motivoSelect").value;
@@ -920,18 +1032,17 @@
         if(faltouIdFinal) {
             const novaMov = { id:nextMovId++, quemSaiuId:faltouIdFinal, quemEntrouId:plantaoId, postoId, motivo, dataHora, observacao:`Gerado pela FT ${novaFt.id}`, ftVinculadaId:novaFt.id, valorGerado:motivo==="Remanejamento Interno"?valor:0 };
             novaFt.movimentacaoVinculadaId = novaMov.id;
-            movRecords.push(novaMov);
+            await fsSet("movRecords", novaMov.id, novaMov);
         }
 
-        ftRecords.push(novaFt);
-        saveAll(); renderFtTable(); renderMovTable();
+        await fsSet("ftRecords", novaFt.id, novaFt);
         document.getElementById("ftForm").reset(); setDefaultDateTime();
         alert("✅ FT registrada com sucesso!");
-        atualizarDashboard();
     }
 
     /* ── REGISTER MOV ── */
-    function registerMov(e) {
+    /* ── REGISTER MOV ── */
+    async function registerMov(e) {
         e.preventDefault();
         const quemSaiuId  = parseInt(document.getElementById("movQuemSaiu").value);
         const quemEntrouId= parseInt(document.getElementById("movQuemEntrou").value);
@@ -951,15 +1062,13 @@
             const valorFT = valorInformado > 0 ? valorInformado : 100.00;
             const novaFt  = { id:nextFtId++, postoId, motivo:"Remanejamento Interno", horario:"Turno Integral", plantaoId:quemEntrouId, faltouId:quemSaiuId, valor:valorFT, eventoDataHora:dataHora, movimentacaoVinculadaId:novaMov.id };
             novaMov.ftVinculadaId = novaFt.id; novaMov.valorGerado = valorFT;
-            ftRecords.push(novaFt);
+            await fsSet("ftRecords", novaFt.id, novaFt);
             alert(`✅ FT gerada para ${employees.find(e=>e.id===quemEntrouId)?.name||'o substituto'} — R$ ${valorFT.toFixed(2)}`);
         }
 
-        movRecords.push(novaMov);
-        saveAll(); renderMovTable(); renderFtTable();
+        await fsSet("movRecords", novaMov.id, novaMov);
         document.getElementById("movForm").reset(); setDefaultMovDateTime();
         alert("Movimentação registrada!");
-        atualizarDashboard();
     }
 
     /* ── DELETE ── */
@@ -967,13 +1076,12 @@
         const ft = ftRecords.find(f=>f.id===id);
         if(ft?.movimentacaoVinculadaId) {
             if(confirm("Excluir FT e movimentação vinculada?")) {
-                movRecords = movRecords.filter(m=>m.id!==ft.movimentacaoVinculadaId);
-                ftRecords  = ftRecords.filter(f=>f.id!==id);
-                saveAll(); renderFtTable(); renderMovTable(); atualizarDashboard(); alert("Excluído!");
+                fsDel("movRecords", ft.movimentacaoVinculadaId);
+                fsDel("ftRecords", id);
+                alert("Excluído!");
             }
         } else if(confirm("Excluir esta FT?")) {
-            ftRecords = ftRecords.filter(f=>f.id!==id);
-            saveAll(); renderFtTable(); atualizarDashboard();
+            fsDel("ftRecords", id);
         }
     };
 
@@ -981,13 +1089,12 @@
         const mov = movRecords.find(m=>m.id===id);
         if(mov?.ftVinculadaId) {
             if(confirm("Excluir movimentação e FT vinculada?")) {
-                ftRecords  = ftRecords.filter(f=>f.id!==mov.ftVinculadaId);
-                movRecords = movRecords.filter(m=>m.id!==id);
-                saveAll(); renderFtTable(); renderMovTable(); atualizarDashboard(); alert("Excluído!");
+                fsDel("ftRecords", mov.ftVinculadaId);
+                fsDel("movRecords", id);
+                alert("Excluído!");
             }
         } else if(confirm("Excluir esta movimentação?")) {
-            movRecords = movRecords.filter(m=>m.id!==id);
-            saveAll(); renderMovTable(); atualizarDashboard();
+            fsDel("movRecords", id);
         }
     };
 
@@ -1271,34 +1378,6 @@
             });
         });
     }
-
-    /* ── INIT ── */
-    function init() {
-        loadData();
-        loadAtestadoData();
-        initTabs();
-        renderEmployeeTable();
-        renderPostoTable();
-        updateSelects();
-        updateAtestadoSelect();
-        renderFtTable();
-        renderMovTable();
-        setDefaultDateTime();
-        setDefaultMovDateTime();
-        setupMotivoListener();
-        document.getElementById("ftForm")?.addEventListener("submit", registerFt);
-        document.getElementById("movForm")?.addEventListener("submit", registerMov);
-        document.getElementById("bicoFixoForm")?.addEventListener("submit", registerBicoFixo);
-        document.getElementById("atestadoForm")?.addEventListener("submit", registerAtestado);
-        document.getElementById("openAddEmployeeModal")?.addEventListener("click",()=>{ const n=prompt("Nome do funcionário:"); if(n?.trim()) addEmployee(n.trim()); });
-        document.getElementById("openAddPostoModal")?.addEventListener("click",()=>{ const n=prompt("Nome do posto:"); if(n?.trim()) addPosto(n.trim()); });
-        renderBicoFixoTable();
-        renderAtestadoTable();
-        setDefaultBicoData();
-        setupBicoHorarioListener();
-        setupBicoValorListener();
-        atualizarDashboard();
-    }
     /* ── BICO FIXO ── */
     function setDefaultBicoData() {
         const dt = document.getElementById("bicoData");
@@ -1356,7 +1435,7 @@
         if(cnt) cnt.innerHTML = `${bicoRecords.length} registro(s)`;
     }
 
-    function registerBicoFixo(e) {
+    async function registerBicoFixo(e) {
         e.preventDefault();
         const empId   = parseInt(document.getElementById("bicoNomeSelect").value);
         const postoId = parseInt(document.getElementById("bicoPostoSelect").value);
@@ -1369,18 +1448,15 @@
         if(!empId || !postoId || !data || !horario || horario === "") {
             alert("Preencha todos os campos obrigatórios"); return;
         }
-        bicoRecords.push({ id: nextBicoId++, empId, postoId, data, horario, valor: valorBico });
-        saveAll();
-        renderBicoFixoTable();
+        const novo = { id: nextBicoId++, empId, postoId, data, horario, valor: valorBico };
+        await fsSet("bicoRecords", novo.id, novo);
         resetBicoForm();
         alert("✅ Bico Fixo registrado com sucesso!");
-        atualizarDashboard();
     }
 
     window.deleteBicoFixo = id => {
         if(confirm("Excluir este registro de Bico Fixo?")) {
-            bicoRecords = bicoRecords.filter(b=>b.id!==id);
-            saveAll(); renderBicoFixoTable(); atualizarDashboard();
+            fsDel("bicoRecords", id);
         }
     };
 
@@ -1608,21 +1684,11 @@
     // Atestados – dados e lógica
     let nextAtestadoId = 1;
 
-    function loadAtestadoData() {
-        atestadoRecords = JSON.parse(localStorage.getItem("ms_atestado_records") || '[]');
-        const storedNext = JSON.parse(localStorage.getItem("ms_next_ids") || '{}');
-        nextAtestadoId = storedNext.nextAtestadoId || (atestadoRecords.length ? Math.max(...atestadoRecords.map(a=>a.id))+1 : 1);
-    }
-
-    function saveAtestadoData() {
-        localStorage.setItem("ms_atestado_records", JSON.stringify(atestadoRecords));
-        const storedNext = JSON.parse(localStorage.getItem("ms_next_ids") || '{}');
-        storedNext.nextAtestadoId = nextAtestadoId;
-        localStorage.setItem("ms_next_ids", JSON.stringify(storedNext));
-    }
+    // Firestore é a fonte de verdade; loadAtestadoData e saveAtestadoData são no-ops
+    function loadAtestadoData() {}
+    function saveAtestadoData() {}
 
     function updateAtestadoSelect() {
-        // Form select
         const sel = document.getElementById("atestadoNomeSelect");
         if(sel) {
             const cur = sel.value;
@@ -1634,11 +1700,10 @@
                 sel.appendChild(opt);
             });
         }
-        // Filter select
         updateAtestadoFilterColaborador();
     }
 
-    function registerAtestado(e) {
+    async function registerAtestado(e) {
         e.preventDefault();
         const empId     = parseInt(document.getElementById("atestadoNomeSelect").value);
         const dataAt    = document.getElementById("atestadoData").value;
@@ -1649,11 +1714,9 @@
         if(!empId || !dataAt || !dias || !dataEnvio) {
             alert("Preencha todos os campos obrigatórios (Colaborador, Data do Atestado, Dias e Data de Envio)."); return;
         }
-        atestadoRecords.push({ id: nextAtestadoId++, empId, dataAtestado: dataAt, dias, dataEnvio, cid, relatorio });
-        saveAtestadoData();
-        renderAtestadoTable();
+        const novo = { id: nextAtestadoId++, empId, dataAtestado: dataAt, dias, dataEnvio, cid, relatorio };
+        await fsSet("atestadoRecords", novo.id, novo);
         resetAtestadoForm();
-        atualizarDashboard();
         alert("✅ Atestado registrado com sucesso!");
     }
 
@@ -1668,14 +1731,66 @@
 
     window.deleteAtestado = id => {
         if(confirm("Excluir este registro de atestado?")) {
-            atestadoRecords = atestadoRecords.filter(a=>a.id!==id);
-            saveAtestadoData();
-            renderAtestadoTable();
-            atualizarDashboard();
+            fsDel("atestadoRecords", id);
         }
     };
 
-    init();
+    // ── INIT ──
+    // Aguarda Firebase estar pronto antes de iniciar
+    window.addEventListener("firebase-ready", () => {
+        // Acessa módulo exportado pelo script de módulo
+        if(!window._firestore) {
+            setBadge("error");
+            alert("❌ Firebase não carregou. Verifique as configurações no código.");
+            return;
+        }
+        db = window._firestore.db;
+        FS = window._firestore;
+
+        setBadge("connecting");
+
+        // Inicia listeners de tempo real — eles chamarão render* automaticamente
+        startListeners();
+
+        // Inicializa UI (tabs, formulários, etc.)
+        uiInit();
+    });
+
+    // uiInit: tudo que era o init() original, sem loadData/saveAll
+    function uiInit() {
+        initTabs();
+        setupMotivoListener();
+        setupBicoHorarioListener();
+        setupBicoValorListener();
+        setDefaultDateTime();
+        setDefaultMovDateTime();
+        setDefaultBicoData();
+        resetAtestadoForm();
+
+        document.getElementById("ftForm")?.addEventListener("submit", registerFt);
+        document.getElementById("movForm")?.addEventListener("submit", registerMov);
+        document.getElementById("bicoFixoForm")?.addEventListener("submit", registerBicoFixo);
+        document.getElementById("atestadoForm")?.addEventListener("submit", registerAtestado);
+
+        document.getElementById("addEmployeeBtn")?.addEventListener("click", () => {
+            const inp = document.getElementById("newEmployeeName");
+            if(inp) { addEmployee(inp.value); inp.value = ""; }
+        });
+        document.getElementById("newEmployeeName")?.addEventListener("keydown", ev => {
+            if(ev.key==="Enter") { ev.preventDefault(); document.getElementById("addEmployeeBtn")?.click(); }
+        });
+        document.getElementById("addPostoBtn")?.addEventListener("click", () => {
+            const inp = document.getElementById("newPostoName");
+            if(inp) { addPosto(inp.value); inp.value = ""; }
+        });
+        document.getElementById("newPostoName")?.addEventListener("keydown", ev => {
+            if(ev.key==="Enter") { ev.preventDefault(); document.getElementById("addPostoBtn")?.click(); }
+        });
+
+        // Fallback para botões modais estilo prompt
+        document.getElementById("openAddEmployeeModal")?.addEventListener("click",()=>{ const n=prompt("Nome do funcionário:"); if(n?.trim()) addEmployee(n.trim()); });
+        document.getElementById("openAddPostoModal")?.addEventListener("click",()=>{ const n=prompt("Nome do posto:"); if(n?.trim()) addPosto(n.trim()); });
+    }
 </script>
 </body>
 </html>
