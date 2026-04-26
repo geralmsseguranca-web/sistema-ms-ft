@@ -657,15 +657,15 @@
             <div class="filter-bar" style="margin-top:8px;">
                 <div class="input-group">
                     <label><i class="fas fa-calendar-alt"></i> Data Início</label>
-                    <input type="date" id="bicoFiltroInicio">
+                    <input type="date" id="bicoFiltroInicio" onchange="filtrarAtualizarBicoDash()">
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-calendar-alt"></i> Data Fim</label>
-                    <input type="date" id="bicoFiltroFim">
+                    <input type="date" id="bicoFiltroFim" onchange="filtrarAtualizarBicoDash()">
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-clock"></i> Horário</label>
-                    <select id="bicoFiltroHorario">
+                    <select id="bicoFiltroHorario" onchange="filtrarAtualizarBicoDash()">
                         <option value="">Todos os horários</option>
                         <option value="18:00 às 06:00">18:00 às 06:00</option>
                         <option value="06:00 às 18:00">06:00 às 18:00</option>
@@ -675,13 +675,13 @@
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-user"></i> Funcionário</label>
-                    <select id="bicoFiltroFuncionario">
+                    <select id="bicoFiltroFuncionario" onchange="filtrarAtualizarBicoDash()">
                         <option value="">Todos os funcionários</option>
                     </select>
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-building"></i> Posto</label>
-                    <select id="bicoFiltroPosto">
+                    <select id="bicoFiltroPosto" onchange="filtrarAtualizarBicoDash()">
                         <option value="">Todos os postos</option>
                     </select>
                 </div>
@@ -756,6 +756,67 @@
                 <table class="data-table" id="bicoFixoTable">
                     <thead><tr><th>Nome</th><th>Posto</th><th>Data</th><th>Horário</th><th>Valor (R$)</th><th>Ações</th></tr></thead>
                     <tbody id="bicoFixoTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HISTÓRICO DE MOVIMENTAÇÕES NA ABA BICO FIXO -->
+        <div class="card" id="bicoMovHistoricoCard">
+            <div class="card-header">
+                <h2><i class="fas fa-history"></i> Histórico de Movimentações</h2>
+                <span class="badge-status" id="bicoMovHistoricoCount">0 registro(s)</span>
+            </div>
+            <div class="filter-bar" style="margin-bottom:20px;">
+                <div class="input-group">
+                    <label><i class="fas fa-calendar-alt"></i> Data Início</label>
+                    <input type="date" id="bicoMovFiltroInicio" onchange="renderBicoMovHistorico()">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-calendar-alt"></i> Data Fim</label>
+                    <input type="date" id="bicoMovFiltroFim" onchange="renderBicoMovHistorico()">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Colaborador</label>
+                    <select id="bicoMovFiltroColaborador" onchange="renderBicoMovHistorico()">
+                        <option value="">Todos os colaboradores</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-building"></i> Posto</label>
+                    <select id="bicoMovFiltroPosto" onchange="renderBicoMovHistorico()">
+                        <option value="">Todos os postos</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-comment-dots"></i> Motivo</label>
+                    <select id="bicoMovFiltroMotivo" onchange="renderBicoMovHistorico()">
+                        <option value="">Todos os motivos</option>
+                        <option value="Atestado">Atestado</option>
+                        <option value="Cobertura de Férias">Cobertura de Férias</option>
+                        <option value="Falta de Efetivo">Falta de Efetivo</option>
+                        <option value="Remanejamento Interno">Remanejamento Interno</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="renderBicoMovHistorico()"><i class="fas fa-search"></i> Filtrar</button>
+                    <button class="btn-secondary" onclick="limparFiltrosBicoMov()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table" id="bicoMovHistoricoTable">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Quem Saiu</th>
+                            <th>Quem Entrou</th>
+                            <th>Posto</th>
+                            <th>Motivo</th>
+                            <th>FT Vinculada</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bicoMovHistoricoBody"></tbody>
                 </table>
             </div>
         </div>
@@ -965,7 +1026,7 @@
         _unsubscribers.push(sub(colRef("movRecords"), snap => {
             movRecords = snap.docs.map(d => d.data());
             nextMovId = calcNext(movRecords);
-            renderMovTable(); atualizarDashboard();
+            renderMovTable(); atualizarDashboard(); renderBicoMovHistorico?.();
         }));
 
         _unsubscribers.push(sub(colRef("bicoRecords"), snap => {
@@ -1011,6 +1072,7 @@
 
         // Atualiza filtros do dashboard Bico Fixo
         if(typeof updateBicoFiltroSelects === 'function') updateBicoFiltroSelects();
+        if(typeof updateBicoMovFiltroSelects === 'function') updateBicoMovFiltroSelects();
     }
 
     function setupMotivoListener() {
@@ -1242,8 +1304,8 @@
     };
 
     /* ── HELPERS ── */
-    function setDefaultDateTime()    { const dt=document.getElementById("dataHoraEvento"); if(dt&&!dt.value) dt.value=new Date().toISOString().slice(0,16); }
-    function setDefaultMovDateTime() { const dt=document.getElementById("movDataHora");    if(dt&&!dt.value) dt.value=new Date().toISOString().slice(0,16); }
+    function setDefaultDateTime()    { const dt=document.getElementById("dataHoraEvento"); if(dt) dt.value=new Date().toISOString().slice(0,16); }
+    function setDefaultMovDateTime() { const dt=document.getElementById("movDataHora");    if(dt) dt.value=new Date().toISOString().slice(0,16); }
 
     function getFiltros() {
         return {
@@ -1516,7 +1578,7 @@
                 if(tab==="tab-reports")   atualizarDashboard();
                 else if(tab==="tab-ft")   setDefaultDateTime();
                 else if(tab==="tab-mov")  setDefaultMovDateTime();
-                else if(tab==="tab-bicofixo") { setDefaultBicoData(); updateBicoFiltroSelects(); filtrarAtualizarBicoDash(); }
+                else if(tab==="tab-bicofixo") { setDefaultBicoData(); updateBicoFiltroSelects(); updateBicoMovFiltroSelects(); filtrarAtualizarBicoDash(); renderBicoMovHistorico(); }
                 else if(tab==="tab-atestados") { updateAtestadoSelect(); updateAtestadoFilterColaborador(); renderAtestadoTable(); resetAtestadoForm(); }
             });
         });
@@ -1524,7 +1586,7 @@
     /* ── BICO FIXO ── */
     function setDefaultBicoData() {
         const dt = document.getElementById("bicoData");
-        if(dt && !dt.value) dt.value = new Date().toISOString().slice(0,10);
+        if(dt) dt.value = new Date().toISOString().slice(0,10);
     }
 
     function setupBicoHorarioListener() {
@@ -1877,6 +1939,68 @@
             fsDel("atestadoRecords", id);
         }
     };
+
+    // ── HISTÓRICO DE MOVIMENTAÇÕES NA ABA BICO FIXO ──
+    function renderBicoMovHistorico() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+
+        const inicio  = document.getElementById("bicoMovFiltroInicio")?.value || "";
+        const fim     = document.getElementById("bicoMovFiltroFim")?.value    || "";
+        const empId   = parseInt(document.getElementById("bicoMovFiltroColaborador")?.value) || 0;
+        const postoId = parseInt(document.getElementById("bicoMovFiltroPosto")?.value)       || 0;
+        const motivo  = document.getElementById("bicoMovFiltroMotivo")?.value || "";
+
+        let lista = [...movRecords];
+        if(inicio)  lista = lista.filter(m => (m.dataHora||"").split("T")[0] >= inicio);
+        if(fim)     lista = lista.filter(m => (m.dataHora||"").split("T")[0] <= fim);
+        if(empId)   lista = lista.filter(m => m.quemSaiuId === empId || m.quemEntrouId === empId);
+        if(postoId) lista = lista.filter(m => m.postoId === postoId);
+        if(motivo)  lista = lista.filter(m => m.motivo === motivo);
+
+        lista.sort((a,b) => (b.dataHora||"").localeCompare(a.dataHora||""));
+
+        const tbody = document.getElementById("bicoMovHistoricoBody");
+        const cnt   = document.getElementById("bicoMovHistoricoCount");
+
+        if(tbody) {
+            tbody.innerHTML = lista.length ? lista.map(mov => {
+                const ftLink = mov.ftVinculadaId
+                    ? `<i class="fas fa-check-circle" style="color:#10b981" title="FT ID: ${mov.ftVinculadaId}"></i> R$ ${mov.valorGerado ? mov.valorGerado.toFixed(2) : '0,00'}`
+                    : '<span style="color:var(--text-dim)">—</span>';
+                return `<tr>
+                    <td>${(mov.dataHora||'---').replace('T',' ').substring(0,16)}</td>
+                    <td>${escapeHtml(empMap.get(mov.quemSaiuId)||'?')} <span style="color:#ef4444;font-size:0.7rem">(saiu)</span></td>
+                    <td><strong style="color:#34d399">${escapeHtml(empMap.get(mov.quemEntrouId)||'?')}</strong> <span style="color:#34d399;font-size:0.7rem">(entrou)</span></td>
+                    <td>${escapeHtml(postoMap.get(mov.postoId)||'?')}</td>
+                    <td><span style="background:rgba(45,92,166,0.18);color:#7aaeff;padding:3px 10px;border-radius:100px;font-size:0.78rem;font-weight:600;">${escapeHtml(mov.motivo||'—')}</span></td>
+                    <td>${ftLink}</td>
+                    <td style="font-size:0.82rem;color:var(--text-sub);max-width:200px;white-space:pre-wrap;word-break:break-word;">${escapeHtml(mov.observacao||'—')}</td>
+                </tr>`;
+            }).join('') : '<tr class="empty-row"><td colspan="7">Nenhuma movimentação encontrada</td></tr>';
+        }
+        if(cnt) cnt.innerHTML = `${lista.length} registro(s)`;
+    }
+
+    function limparFiltrosBicoMov() {
+        ["bicoMovFiltroInicio","bicoMovFiltroFim","bicoMovFiltroColaborador","bicoMovFiltroPosto","bicoMovFiltroMotivo"].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = "";
+        });
+        renderBicoMovHistorico();
+    }
+
+    function updateBicoMovFiltroSelects() {
+        const sf = document.getElementById("bicoMovFiltroColaborador");
+        if(sf) {
+            const cur = sf.value;
+            sf.innerHTML = '<option value="">Todos os colaboradores</option>' + employees.map(e=>`<option value="${e.id}"${String(e.id)===cur?' selected':''}>${escapeHtml(e.name)}</option>`).join('');
+        }
+        const sp = document.getElementById("bicoMovFiltroPosto");
+        if(sp) {
+            const cur2 = sp.value;
+            sp.innerHTML = '<option value="">Todos os postos</option>' + postos.map(p=>`<option value="${p.id}"${String(p.id)===cur2?' selected':''}>${escapeHtml(p.nome)}</option>`).join('');
+        }
+    }
 
     // ── INIT ──
     // Aguarda Firebase estar pronto antes de iniciar
