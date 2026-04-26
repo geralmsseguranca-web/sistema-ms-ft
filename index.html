@@ -445,6 +445,7 @@
                             <option value="Treinamento">Treinamento</option>
                             <option value="Remanejamento Interno">Remanejamento Interno</option>
                             <option value="Extra">Extra</option>
+                            <option value="Folga do Vigia">Folga do Vigia</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -479,6 +480,23 @@
         </div>
         <div class="card">
             <div class="card-header"><h2><i class="fas fa-list-ul"></i> Histórico de FT</h2><span class="badge-status" id="totalFtCount">0</span></div>
+            <!-- Busca por nome na aba FT -->
+            <div class="filter-bar" style="margin-bottom:16px;">
+                <div class="input-group" style="min-width:260px;">
+                    <label><i class="fas fa-search"></i> Buscar por Nome</label>
+                    <input type="text" id="ftBuscaNome" placeholder="Digite o nome do colaborador…" oninput="renderFtTable()">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="document.getElementById('ftBuscaNome').value='';renderFtTable()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+            <!-- Botões de exportação FT -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+                <span style="font-size:0.78rem;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-file-export"></i> Exportar:</span>
+                <button class="btn-success" onclick="exportarFtCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn-success" onclick="exportarFtExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-success" onclick="exportarFtPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="ftTable">
                     <thead><tr><th>Posto</th><th>Motivo</th><th>Horário</th><th>Substituto</th><th>Substituído</th><th>Valor</th><th>Data/Hora</th><th>Mov. Vinculada</th><th>Ações</th></tr></thead>
@@ -503,7 +521,7 @@
                     <div class="input-group"><label><i class="fas fa-sign-out-alt"></i> Quem saiu (Remanejado)</label><select id="movQuemSaiu" required><option value="">-- Selecione --</option></select><small style="color:var(--text-sub)">Este colaborador foi para outro posto</small></div>
                     <div class="input-group"><label><i class="fas fa-sign-in-alt"></i> Quem entrou (Substituto)</label><select id="movQuemEntrou" required><option value="">-- Selecione --</option></select><small style="color:#34d399; font-weight:600">Este receberá a FT</small></div>
                     <div class="input-group"><label><i class="fas fa-building"></i> Posto</label><select id="movPosto" required><option value="">-- Selecione --</option></select></div>
-                    <div class="input-group"><label><i class="fas fa-comment-dots"></i> Motivo</label><select id="movMotivo" required><option value="">-- Selecione --</option><option value="Atestado">Atestado</option><option value="Cobertura de Férias">Cobertura de Férias</option><option value="Falta de Efetivo">Falta de Efetivo</option><option value="Remanejamento Interno">Remanejamento Interno</option><option value="Outro">Outro</option></select></div>
+                    <div class="input-group"><label><i class="fas fa-comment-dots"></i> Motivo</label><select id="movMotivo" required><option value="">-- Selecione --</option><option value="Atestado">Atestado</option><option value="Cobertura de Férias">Cobertura de Férias</option><option value="Falta de Efetivo">Falta de Efetivo</option><option value="Folga do Vigia">Folga do Vigia</option><option value="Remanejamento Interno">Remanejamento Interno</option><option value="Outro">Outro</option></select></div>
                     <div class="input-group"><label><i class="fas fa-calendar-alt"></i> Data/Hora</label><input type="datetime-local" id="movDataHora" required></div>
                     <div class="input-group"><label><i class="fas fa-dollar-sign"></i> Valor da FT (opcional)</label><input type="number" step="0.01" id="movValor" placeholder="R$ 0,00"></div>
                     <div class="input-group"><label><i class="fas fa-align-left"></i> Observação</label><textarea id="movObs" rows="2" style="resize:vertical;"></textarea></div>
@@ -516,6 +534,23 @@
         </div>
         <div class="card">
             <div class="card-header"><h2><i class="fas fa-history"></i> Histórico de Movimentações</h2><span class="badge-status" id="totalMovCount">0</span></div>
+            <!-- Busca por nome na aba Movimentações -->
+            <div class="filter-bar" style="margin-bottom:16px;">
+                <div class="input-group" style="min-width:260px;">
+                    <label><i class="fas fa-search"></i> Buscar por Nome</label>
+                    <input type="text" id="movBuscaNome" placeholder="Digite o nome do colaborador…" oninput="renderMovTable()">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="document.getElementById('movBuscaNome').value='';renderMovTable()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+            <!-- Botões de exportação Movimentações -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+                <span style="font-size:0.78rem;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-file-export"></i> Exportar:</span>
+                <button class="btn-success" onclick="exportarMovCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn-success" onclick="exportarMovExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-success" onclick="exportarMovPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="movTable">
                     <thead><tr><th>Data/Hora</th><th>Quem Saiu</th><th>Quem Entrou</th><th>Posto</th><th>Motivo</th><th>FT Vinculada</th><th>Observação</th><th>Ações</th></tr></thead>
@@ -600,6 +635,23 @@
     <div id="tab-employees" class="tab-content">
         <div class="card">
             <div class="card-header"><h2><i class="fas fa-address-card"></i> Funcionários</h2><button id="openAddEmployeeModal" class="btn-primary"><i class="fas fa-plus"></i> Novo</button></div>
+            <!-- Busca por nome -->
+            <div class="filter-bar" style="margin-bottom:16px;">
+                <div class="input-group" style="min-width:260px;">
+                    <label><i class="fas fa-search"></i> Buscar por Nome</label>
+                    <input type="text" id="empBuscaNome" placeholder="Digite o nome do funcionário…" oninput="renderEmployeeTable()">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="document.getElementById('empBuscaNome').value='';renderEmployeeTable()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+            <!-- Exportação Funcionários -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+                <span style="font-size:0.78rem;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-file-export"></i> Exportar:</span>
+                <button class="btn-success" onclick="exportarFuncionariosCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn-success" onclick="exportarFuncionariosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-success" onclick="exportarFuncionariosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="employeeTable">
                     <thead><tr><th>ID</th><th>Nome</th><th>Ações</th></tr></thead>
@@ -613,6 +665,23 @@
     <div id="tab-postos" class="tab-content">
         <div class="card">
             <div class="card-header"><h2><i class="fas fa-building"></i> Postos de Serviço</h2><button id="openAddPostoModal" class="btn-primary"><i class="fas fa-plus"></i> Novo Posto</button></div>
+            <!-- Busca por nome -->
+            <div class="filter-bar" style="margin-bottom:16px;">
+                <div class="input-group" style="min-width:260px;">
+                    <label><i class="fas fa-search"></i> Buscar por Nome do Posto</label>
+                    <input type="text" id="postoBuscaNome" placeholder="Digite o nome do posto…" oninput="renderPostoTable()">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="document.getElementById('postoBuscaNome').value='';renderPostoTable()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+            <!-- Exportação Postos -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+                <span style="font-size:0.78rem;color:var(--text-sub);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;"><i class="fas fa-file-export"></i> Exportar:</span>
+                <button class="btn-success" onclick="exportarPostosCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn-success" onclick="exportarPostosExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                <button class="btn-success" onclick="exportarPostosPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="postoTable">
                     <thead><tr><th>ID</th><th>Nome do Posto</th><th>Ações</th></tr></thead>
@@ -760,66 +829,6 @@
             </div>
         </div>
 
-        <!-- HISTÓRICO DE MOVIMENTAÇÕES NA ABA BICO FIXO -->
-        <div class="card" id="bicoMovHistoricoCard">
-            <div class="card-header">
-                <h2><i class="fas fa-history"></i> Histórico de Movimentações</h2>
-                <span class="badge-status" id="bicoMovHistoricoCount">0 registro(s)</span>
-            </div>
-            <div class="filter-bar" style="margin-bottom:20px;">
-                <div class="input-group">
-                    <label><i class="fas fa-calendar-alt"></i> Data Início</label>
-                    <input type="date" id="bicoMovFiltroInicio" onchange="renderBicoMovHistorico()">
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-calendar-alt"></i> Data Fim</label>
-                    <input type="date" id="bicoMovFiltroFim" onchange="renderBicoMovHistorico()">
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-user"></i> Colaborador</label>
-                    <select id="bicoMovFiltroColaborador" onchange="renderBicoMovHistorico()">
-                        <option value="">Todos os colaboradores</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-building"></i> Posto</label>
-                    <select id="bicoMovFiltroPosto" onchange="renderBicoMovHistorico()">
-                        <option value="">Todos os postos</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-comment-dots"></i> Motivo</label>
-                    <select id="bicoMovFiltroMotivo" onchange="renderBicoMovHistorico()">
-                        <option value="">Todos os motivos</option>
-                        <option value="Atestado">Atestado</option>
-                        <option value="Cobertura de Férias">Cobertura de Férias</option>
-                        <option value="Falta de Efetivo">Falta de Efetivo</option>
-                        <option value="Remanejamento Interno">Remanejamento Interno</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                </div>
-                <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-                    <button class="btn-primary" onclick="renderBicoMovHistorico()"><i class="fas fa-search"></i> Filtrar</button>
-                    <button class="btn-secondary" onclick="limparFiltrosBicoMov()"><i class="fas fa-times"></i> Limpar</button>
-                </div>
-            </div>
-            <div style="overflow-x:auto;">
-                <table class="data-table" id="bicoMovHistoricoTable">
-                    <thead>
-                        <tr>
-                            <th>Data/Hora</th>
-                            <th>Quem Saiu</th>
-                            <th>Quem Entrou</th>
-                            <th>Posto</th>
-                            <th>Motivo</th>
-                            <th>FT Vinculada</th>
-                            <th>Observação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bicoMovHistoricoBody"></tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <!-- ABA 7 - ATESTADOS -->
@@ -1105,29 +1114,33 @@
     function renderEmployeeTable() {
         const tbody = document.getElementById("employeeTableBody");
         if(!tbody) return;
-        tbody.innerHTML = employees.length
-            ? employees.map(emp => `<tr>
+        const busca = (document.getElementById("empBuscaNome")?.value || "").toLowerCase();
+        const lista = busca ? employees.filter(e => e.name.toLowerCase().includes(busca)) : employees;
+        tbody.innerHTML = lista.length
+            ? lista.map(emp => `<tr>
                 <td>${emp.id}</td>
                 <td><strong>${escapeHtml(emp.name)}</strong></td>
                 <td class="action-icons">
                     <i class="fas fa-edit" onclick="editEmployee(${emp.id})" title="Editar"></i>
                     <i class="fas fa-trash-alt" onclick="deleteEmployee(${emp.id})" title="Excluir"></i>
                 </td></tr>`).join('')
-            : '<tr class="empty-row"><td colspan="3">Nenhum funcionário cadastrado</td></tr>';
+            : '<tr class="empty-row"><td colspan="3">Nenhum funcionário encontrado</td></tr>';
     }
 
     function renderPostoTable() {
         const tbody = document.getElementById("postoTableBody");
         if(!tbody) return;
-        tbody.innerHTML = postos.length
-            ? postos.map(p => `<tr>
+        const busca = (document.getElementById("postoBuscaNome")?.value || "").toLowerCase();
+        const lista = busca ? postos.filter(p => p.nome.toLowerCase().includes(busca)) : postos;
+        tbody.innerHTML = lista.length
+            ? lista.map(p => `<tr>
                 <td>${p.id}</td>
                 <td><strong>${escapeHtml(p.nome)}</strong></td>
                 <td class="action-icons">
                     <i class="fas fa-edit" onclick="editPosto(${p.id})" title="Editar"></i>
                     <i class="fas fa-trash-alt" onclick="deletePosto(${p.id})" title="Excluir"></i>
                 </td></tr>`).join('')
-            : '<tr class="empty-row"><td colspan="3">Nenhum posto cadastrado</td></tr>';
+            : '<tr class="empty-row"><td colspan="3">Nenhum posto encontrado</td></tr>';
     }
 
     function renderFtTable() {
@@ -1135,7 +1148,16 @@
         if(!tbody) return;
         const empMap   = new Map(employees.map(e=>[e.id,e.name]));
         const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
-        tbody.innerHTML = ftRecords.length ? ftRecords.map(ft => {
+        const busca = (document.getElementById("ftBuscaNome")?.value || "").toLowerCase();
+        let lista = ftRecords;
+        if(busca) {
+            lista = lista.filter(ft => {
+                const sub = (empMap.get(ft.plantaoId)||"").toLowerCase();
+                const falt = (empMap.get(ft.faltouId)||"").toLowerCase();
+                return sub.includes(busca) || falt.includes(busca);
+            });
+        }
+        tbody.innerHTML = lista.length ? lista.map(ft => {
             const movLink = ft.movimentacaoVinculadaId
                 ? `<i class="fas fa-check-circle" style="color:#10b981" title="Mov. ID: ${ft.movimentacaoVinculadaId}"></i>` : '-';
             const substituidoDisplay = ft.faltouId
@@ -1152,9 +1174,9 @@
                 <td class="action-icons">${movLink}</td>
                 <td class="action-icons"><i class="fas fa-trash-alt" onclick="deleteFt(${ft.id})" title="Excluir"></i></td>
             </tr>`;
-        }).join('') : '<tr class="empty-row"><td colspan="9">Nenhuma FT registrada</td></tr>';
+        }).join('') : '<tr class="empty-row"><td colspan="9">Nenhuma FT encontrada</td></tr>';
         const cnt = document.getElementById("totalFtCount");
-        if(cnt) cnt.innerHTML = `${ftRecords.length} registro(s)`;
+        if(cnt) cnt.innerHTML = `${lista.length} registro(s)`;
     }
 
     function renderMovTable() {
@@ -1162,7 +1184,16 @@
         if(!tbody) return;
         const empMap   = new Map(employees.map(e=>[e.id,e.name]));
         const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
-        tbody.innerHTML = movRecords.length ? movRecords.map(mov => {
+        const busca = (document.getElementById("movBuscaNome")?.value || "").toLowerCase();
+        let lista = movRecords;
+        if(busca) {
+            lista = lista.filter(mov => {
+                const saiu = (empMap.get(mov.quemSaiuId)||"").toLowerCase();
+                const entrou = (empMap.get(mov.quemEntrouId)||"").toLowerCase();
+                return saiu.includes(busca) || entrou.includes(busca);
+            });
+        }
+        tbody.innerHTML = lista.length ? lista.map(mov => {
             const ftLink = mov.ftVinculadaId
                 ? `<i class="fas fa-check-circle" style="color:#10b981" title="FT ID: ${mov.ftVinculadaId}"></i>` : '-';
             return `<tr>
@@ -1175,9 +1206,9 @@
                 <td>${escapeHtml(mov.observacao||'—')}</td>
                 <td class="action-icons"><i class="fas fa-trash-alt" onclick="deleteMov(${mov.id})" title="Excluir"></i></td>
             </tr>`;
-        }).join('') : '<tr class="empty-row"><td colspan="8">Nenhuma movimentação registrada</td></tr>';
+        }).join('') : '<tr class="empty-row"><td colspan="8">Nenhuma movimentação encontrada</td></tr>';
         const cnt = document.getElementById("totalMovCount");
-        if(cnt) cnt.innerHTML = `${movRecords.length} registro(s)`;
+        if(cnt) cnt.innerHTML = `${lista.length} registro(s)`;
     }
 
     /* ── CRUD ── */
@@ -1578,8 +1609,10 @@
                 if(tab==="tab-reports")   atualizarDashboard();
                 else if(tab==="tab-ft")   setDefaultDateTime();
                 else if(tab==="tab-mov")  setDefaultMovDateTime();
-                else if(tab==="tab-bicofixo") { setDefaultBicoData(); updateBicoFiltroSelects(); updateBicoMovFiltroSelects(); filtrarAtualizarBicoDash(); renderBicoMovHistorico(); }
+                else if(tab==="tab-bicofixo") { setDefaultBicoData(); updateBicoFiltroSelects(); filtrarAtualizarBicoDash(); }
                 else if(tab==="tab-atestados") { updateAtestadoSelect(); updateAtestadoFilterColaborador(); renderAtestadoTable(); resetAtestadoForm(); }
+                else if(tab==="tab-employees") { renderEmployeeTable(); }
+                else if(tab==="tab-postos") { renderPostoTable(); }
             });
         });
     }
@@ -2153,7 +2186,268 @@
         updateBicoFiltroSelects();
     }
 
-    // ── EXPORTAR BICO FIXO ──
+    // ═══════════════════════════════════════════════════════════
+    // EXPORTAÇÕES — FT
+    // ═══════════════════════════════════════════════════════════
+    function exportarFtCSV() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const dados = [['Posto','Motivo','Horário','Substituto','Substituído','Valor (R$)','Data/Hora']];
+        ftRecords.forEach(ft => dados.push([
+            postoMap.get(ft.postoId)||'?',
+            ft.motivo||'',
+            ft.horario||'',
+            empMap.get(ft.plantaoId)||'?',
+            ft.faltouId ? (empMap.get(ft.faltouId)||'?') : 'N/A',
+            ft.valor.toFixed(2),
+            ft.eventoDataHora?.replace('T',' ').substring(0,16)||''
+        ]));
+        const csv = dados.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`ft_${Date.now()}.csv`; a.click();
+    }
+
+    function exportarFtExcel() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const wsData = [['Posto','Motivo','Horário','Substituto','Substituído','Valor (R$)','Data/Hora']];
+        ftRecords.forEach(ft => wsData.push([
+            postoMap.get(ft.postoId)||'?',
+            ft.motivo||'',
+            ft.horario||'',
+            empMap.get(ft.plantaoId)||'?',
+            ft.faltouId ? (empMap.get(ft.faltouId)||'?') : 'N/A',
+            ft.valor||0,
+            ft.eventoDataHora?.replace('T',' ').substring(0,16)||''
+        ]));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Folgas Trabalhadas');
+        XLSX.writeFile(wb, `ft_${Date.now()}.xlsx`);
+    }
+
+    async function exportarFtPDF() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),20,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(14); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Relatório de Folgas Trabalhadas (FT)', 14, 13);
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 13, {align:'right'});
+        const headers = ['Posto','Motivo','Horário','Substituto','Substituído','Valor','Data/Hora'];
+        const colW = [40,35,30,40,40,25,0];
+        const totalFixed = colW.slice(0,-1).reduce((a,b)=>a+b,0);
+        colW[6] = pw - totalFixed;
+        let y = 30;
+        doc.setFillColor(30,64,112);
+        doc.rect(14, y, pw, 8, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+        let cx = 16;
+        headers.forEach((h,i) => { doc.text(h, cx, y+5.5); cx += colW[i]; });
+        y += 8;
+        ftRecords.forEach((ft, idx) => {
+            if(y + 9 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(...(idx%2===0?[17,24,39]:[22,29,46]));
+            doc.rect(14, y, pw, 9, 'F');
+            doc.setTextColor(220,230,240); doc.setFontSize(7); doc.setFont(undefined,'normal');
+            cx = 16;
+            const row = [
+                postoMap.get(ft.postoId)||'?',
+                ft.motivo||'—',
+                ft.horario||'—',
+                empMap.get(ft.plantaoId)||'?',
+                ft.faltouId ? (empMap.get(ft.faltouId)||'?') : 'N/A',
+                'R$ '+ft.valor.toFixed(2),
+                ft.eventoDataHora?.replace('T',' ').substring(0,16)||'—'
+            ];
+            row.forEach((v,i) => { doc.text(String(v), cx, y+6, {maxWidth:colW[i]-3}); cx += colW[i]; });
+            y += 9;
+        });
+        doc.save(`ft_${Date.now()}.pdf`);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EXPORTAÇÕES — MOVIMENTAÇÕES
+    // ═══════════════════════════════════════════════════════════
+    function exportarMovCSV() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const dados = [['Data/Hora','Quem Saiu','Quem Entrou','Posto','Motivo','FT Vinculada','Observação']];
+        movRecords.forEach(m => dados.push([
+            m.dataHora?.replace('T',' ').substring(0,16)||'',
+            empMap.get(m.quemSaiuId)||'?',
+            empMap.get(m.quemEntrouId)||'?',
+            postoMap.get(m.postoId)||'?',
+            m.motivo||'',
+            m.ftVinculadaId ? `FT #${m.ftVinculadaId}` : 'Não',
+            m.observacao||''
+        ]));
+        const csv = dados.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`movimentacoes_${Date.now()}.csv`; a.click();
+    }
+
+    function exportarMovExcel() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const wsData = [['Data/Hora','Quem Saiu','Quem Entrou','Posto','Motivo','FT Vinculada','Observação']];
+        movRecords.forEach(m => wsData.push([
+            m.dataHora?.replace('T',' ').substring(0,16)||'',
+            empMap.get(m.quemSaiuId)||'?',
+            empMap.get(m.quemEntrouId)||'?',
+            postoMap.get(m.postoId)||'?',
+            m.motivo||'',
+            m.ftVinculadaId ? `FT #${m.ftVinculadaId}` : 'Não',
+            m.observacao||''
+        ]));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Movimentações');
+        XLSX.writeFile(wb, `movimentacoes_${Date.now()}.xlsx`);
+    }
+
+    async function exportarMovPDF() {
+        const empMap   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),20,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(14); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Relatório de Movimentações', 14, 13);
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 13, {align:'right'});
+        const headers = ['Data/Hora','Quem Saiu','Quem Entrou','Posto','Motivo','Observação'];
+        const colW = [30,45,45,40,35,0];
+        const totalFixed = colW.slice(0,-1).reduce((a,b)=>a+b,0);
+        colW[5] = pw - totalFixed;
+        let y = 30;
+        doc.setFillColor(30,64,112);
+        doc.rect(14, y, pw, 8, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+        let cx = 16;
+        headers.forEach((h,i) => { doc.text(h, cx, y+5.5); cx += colW[i]; });
+        y += 8;
+        movRecords.forEach((m, idx) => {
+            if(y + 9 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(...(idx%2===0?[17,24,39]:[22,29,46]));
+            doc.rect(14, y, pw, 9, 'F');
+            doc.setTextColor(220,230,240); doc.setFontSize(7); doc.setFont(undefined,'normal');
+            cx = 16;
+            const row = [
+                m.dataHora?.replace('T',' ').substring(0,16)||'—',
+                empMap.get(m.quemSaiuId)||'?',
+                empMap.get(m.quemEntrouId)||'?',
+                postoMap.get(m.postoId)||'?',
+                m.motivo||'—',
+                m.observacao||'—'
+            ];
+            row.forEach((v,i) => { doc.text(String(v), cx, y+6, {maxWidth:colW[i]-3}); cx += colW[i]; });
+            y += 9;
+        });
+        doc.save(`movimentacoes_${Date.now()}.pdf`);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EXPORTAÇÕES — FUNCIONÁRIOS
+    // ═══════════════════════════════════════════════════════════
+    function exportarFuncionariosCSV() {
+        const dados = [['ID','Nome']];
+        employees.forEach(e => dados.push([e.id, e.name]));
+        const csv = dados.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`funcionarios_${Date.now()}.csv`; a.click();
+    }
+
+    function exportarFuncionariosExcel() {
+        const wsData = [['ID','Nome']];
+        employees.forEach(e => wsData.push([e.id, e.name]));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Funcionários');
+        XLSX.writeFile(wb, `funcionarios_${Date.now()}.xlsx`);
+    }
+
+    async function exportarFuncionariosPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),20,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(14); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Lista de Funcionários', 14, 13);
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text(`Total: ${employees.length} | Data: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 13, {align:'right'});
+        let y = 30;
+        doc.setFillColor(30,64,112);
+        doc.rect(14, y, pw, 8, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont(undefined,'bold');
+        doc.text('ID', 16, y+5.5);
+        doc.text('Nome', 36, y+5.5);
+        y += 8;
+        employees.forEach((e, idx) => {
+            if(y + 9 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(...(idx%2===0?[17,24,39]:[22,29,46]));
+            doc.rect(14, y, pw, 9, 'F');
+            doc.setTextColor(220,230,240); doc.setFontSize(8); doc.setFont(undefined,'normal');
+            doc.text(String(e.id), 16, y+6);
+            doc.text(e.name, 36, y+6);
+            y += 9;
+        });
+        doc.save(`funcionarios_${Date.now()}.pdf`);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EXPORTAÇÕES — POSTOS
+    // ═══════════════════════════════════════════════════════════
+    function exportarPostosCSV() {
+        const dados = [['ID','Nome do Posto']];
+        postos.forEach(p => dados.push([p.id, p.nome]));
+        const csv = dados.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`postos_${Date.now()}.csv`; a.click();
+    }
+
+    function exportarPostosExcel() {
+        const wsData = [['ID','Nome do Posto']];
+        postos.forEach(p => wsData.push([p.id, p.nome]));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'Postos');
+        XLSX.writeFile(wb, `postos_${Date.now()}.xlsx`);
+    }
+
+    async function exportarPostosPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),20,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(14); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Lista de Postos de Serviço', 14, 13);
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text(`Total: ${postos.length} | Data: ${new Date().toLocaleDateString('pt-BR')}`, pw+14, 13, {align:'right'});
+        let y = 30;
+        doc.setFillColor(30,64,112);
+        doc.rect(14, y, pw, 8, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont(undefined,'bold');
+        doc.text('ID', 16, y+5.5);
+        doc.text('Nome do Posto', 36, y+5.5);
+        y += 8;
+        postos.forEach((p, idx) => {
+            if(y + 9 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(...(idx%2===0?[17,24,39]:[22,29,46]));
+            doc.rect(14, y, pw, 9, 'F');
+            doc.setTextColor(220,230,240); doc.setFontSize(8); doc.setFont(undefined,'normal');
+            doc.text(String(p.id), 16, y+6);
+            doc.text(p.nome, 36, y+6);
+            y += 9;
+        });
+        doc.save(`postos_${Date.now()}.pdf`);
+    }
+
+
     function exportarBicoCSV() {
         const empMap   = new Map(employees.map(e=>[e.id,e.name]));
         const postoMap = new Map(postos.map(p=>[p.id,p.nome]));
