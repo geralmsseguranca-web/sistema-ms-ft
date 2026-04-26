@@ -608,11 +608,6 @@
                 <div class="stat-card stat-card-at"><div class="stat-icon"><i class="fas fa-file-medical"></i></div><div class="stat-value" id="totalAtestadoCard">0</div><div class="stat-label">Atestados</div></div>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 28px;">
-                <div class="chart-box"><canvas id="chartFtPorMotivo"></canvas></div>
-                <div class="chart-box"><canvas id="chartMovPorMotivo"></canvas></div>
-            </div>
-
             <div class="export-buttons">
                 <button class="btn-success" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> Exportar CSV</button>
                 <button class="btn-success" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
@@ -634,15 +629,6 @@
                     <thead><tr><th>Colaborador</th><th>Posto</th><th>Data</th><th>Horário</th><th>Valor (R$)</th></tr></thead>
                     <tbody id="relatorioBicoBody"></tbody>
                     <tfoot id="relatorioBicoFooter"></tfoot>
-                </table>
-            </div>
-
-            <div class="card-header" style="margin-top: 28px;"><h2><i class="fas fa-exchange-alt" style="color:var(--gold-bright)"></i> Movimentações do Período</h2><span id="dashMovBadge" class="badge-status">0 registros</span></div>
-            <div style="overflow-x: auto;">
-                <table class="data-table" id="dashMovTable">
-                    <thead><tr><th>Data/Hora</th><th>Quem Saiu</th><th>Quem Entrou</th><th>Posto</th><th>Motivo</th><th>Obs.</th></tr></thead>
-                    <tbody id="dashMovBody"></tbody>
-                    <tfoot id="dashMovFooter"></tfoot>
                 </table>
             </div>
 
@@ -1453,66 +1439,11 @@
             } else if(tfAt) { tfAt.innerHTML = ""; }
         }
 
-        /* Gráfico FT por Motivo */
-        const ftMotivos = {};
-        ftFiltrados.forEach(ft => ftMotivos[ft.motivo] = (ftMotivos[ft.motivo]||0)+1);
-        destroyChart('ftChart');
-        const ftCtx = document.getElementById("chartFtPorMotivo");
-        if(ftCtx) {
-            ftChart = new Chart(ftCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(ftMotivos),
-                    datasets: [{
-                        label: 'Quantidade de FT',
-                        data:  Object.values(ftMotivos),
-                        backgroundColor: CHART_COLORS,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        title:  { display: true, text: 'FT por Motivo', color: '#e2e8f0', font: { size: 14, weight: '700' } }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#8b9db5' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#8b9db5' }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        /* Movimentações */
+        /* Movimentações - contador do card */
         let movFiltrados = filtrarPorData(movRecords, 'dataHora');
         if(postoId) movFiltrados = movFiltrados.filter(m=>m.postoId===postoId);
         const elMov = document.getElementById("totalMovCard");
         if(elMov) elMov.textContent = movFiltrados.length;
-
-        const movMotivos = {};
-        movFiltrados.forEach(m => movMotivos[m.motivo] = (movMotivos[m.motivo]||0)+1);
-        destroyChart('movChart');
-        const movCtx = document.getElementById("chartMovPorMotivo");
-        if(movCtx) {
-            movChart = new Chart(movCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(movMotivos),
-                    datasets: [{ data: Object.values(movMotivos), backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#111827' }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#e2e8f0', padding: 12, font: { size: 12 } } },
-                        title:  { display: true, text: 'Movimentações por Motivo', color: '#e2e8f0', font: { size: 14, weight: '700' } }
-                    }
-                }
-            });
-        }
 
         /* Tabela por colaborador */
         const empMap   = new Map(employees.map(e=>[e.id,e.name]));
@@ -1576,33 +1507,6 @@
             } else if(tfootBico) { tfootBico.innerHTML = ""; }
         }
 
-        /* Tabela Movimentações no dashboard */
-        const empMapMov   = new Map(employees.map(e=>[e.id,e.name]));
-        const postoMapMov = new Map(postos.map(p=>[p.id,p.nome]));
-        let movDash = filtrarPorData(movRecords, 'dataHora');
-        if(postoId)       movDash = movDash.filter(m=>m.postoId===postoId);
-        if(colaboradorId) movDash = movDash.filter(m=>m.quemSaiuId===colaboradorId||m.quemEntrouId===colaboradorId);
-
-        const dashMovBody   = document.getElementById("dashMovBody");
-        const dashMovFooter = document.getElementById("dashMovFooter");
-        const dashMovBadge  = document.getElementById("dashMovBadge");
-        if(dashMovBadge) dashMovBadge.innerHTML = `${movDash.length} registro(s)`;
-        if(dashMovBody) {
-            dashMovBody.innerHTML = movDash.length
-                ? movDash.map(m => `<tr>
-                    <td>${m.dataHora?.replace('T',' ').substring(0,16)||'---'}</td>
-                    <td>${escapeHtml(empMapMov.get(m.quemSaiuId)||'?')} <span style="color:#f43f5e;font-size:0.7rem">(saiu)</span></td>
-                    <td><strong style="color:#34d399">${escapeHtml(empMapMov.get(m.quemEntrouId)||'?')}</strong> <span style="color:#34d399;font-size:0.7rem">(entrou)</span></td>
-                    <td>${escapeHtml(postoMapMov.get(m.postoId)||'?')}</td>
-                    <td><span style="background:rgba(99,102,241,0.15);color:#a5b4fc;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">${escapeHtml(m.motivo)}</span></td>
-                    <td style="font-size:0.82rem;color:var(--text-sub)">${escapeHtml(m.observacao||'—')}</td>
-                  </tr>`).join('')
-                : '<tr class="empty-row"><td colspan="6">Nenhuma movimentação no período filtrado</td></tr>';
-            if(dashMovFooter && movDash.length) {
-                const totalComFT = movDash.filter(m=>m.ftVinculadaId).length;
-                dashMovFooter.innerHTML = `<tr style="background:rgba(99,102,241,0.15);"><td colspan="4" style="text-align:right;font-weight:700;padding:12px 15px;color:#a5b4fc">TOTAL MOVIMENTAÇÕES:</td><td style="font-weight:800;font-size:1rem;padding:12px 15px;color:#fbbf24">${movDash.length}</td><td style="font-size:0.8rem;color:#34d399;padding:12px 15px">${totalComFT} com FT vinculada</td></tr>`;
-            } else if(dashMovFooter) { dashMovFooter.innerHTML = ""; }
-        }
     }
 
     function destroyChart(name) {
