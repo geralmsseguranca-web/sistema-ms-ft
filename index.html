@@ -413,6 +413,62 @@
         }
         .chart-box canvas { max-height: 264px; }
 
+
+        /* ── CHECKLIST SUPERVISOR ── */
+        .ck-section { display: flex; flex-direction: column; gap: 10px; }
+        .ck-item {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            transition: border-color 0.2s;
+        }
+        .ck-item:hover { border-color: var(--border-glow); }
+        .ck-item.ck-ok { border-left: 4px solid var(--green); }
+        .ck-item.ck-nok { border-left: 4px solid var(--red); }
+        .ck-item.ck-na { border-left: 4px solid var(--text-dim); }
+        .ck-item-label {
+            flex: 1;
+            min-width: 200px;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            font-weight: 500;
+            padding-top: 4px;
+        }
+        .ck-item-label small {
+            display: block;
+            color: var(--text-sub);
+            font-size: 0.74rem;
+            margin-top: 3px;
+        }
+        .ck-btns { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        .ck-btn {
+            padding: 7px 18px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-base);
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.18s;
+        }
+        .ck-btn:hover { transform: translateY(-1px); }
+        .ck-btn.active-ok { background: rgba(16,185,129,0.15); color: var(--green); border-color: var(--green); }
+        .ck-btn.active-nok { background: rgba(244,63,94,0.15); color: var(--red); border-color: var(--red); }
+        .ck-btn.active-na { background: rgba(71,85,105,0.3); color: var(--text-dim); border-color: var(--text-dim); }
+        .ck-obs-wrap { width: 100%; margin-top: 4px; }
+        .ck-obs-wrap input {
+            width: 100%;
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
         @media (max-width: 700px) {
             body { padding: 12px; }
             .card { padding: 18px; }
@@ -422,6 +478,109 @@
         }
 
         .btn-export-at:hover { transform: translateY(-2px) !important; filter: brightness(1.12); }
+
+        /* ── CHECKLIST FOTOS ── */
+        .ck-foto-upload-area {
+            border: 2px dashed var(--border-glow);
+            border-radius: 18px;
+            padding: 22px 18px;
+            text-align: center;
+            background: var(--bg-card2);
+            cursor: pointer;
+            transition: all 0.22s ease;
+            margin-bottom: 16px;
+        }
+        .ck-foto-upload-area:hover {
+            border-color: var(--blue-main);
+            background: rgba(99,102,241,0.07);
+        }
+        .ck-foto-upload-area i { font-size: 2rem; color: var(--blue-light); margin-bottom: 10px; display: block; }
+        .ck-foto-upload-area p { color: var(--text-sub); font-size: 0.85rem; margin: 0; }
+        .ck-foto-upload-area small { color: var(--text-dim); font-size: 0.74rem; }
+
+        .ck-fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .ck-foto-thumb {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1.5px solid var(--border);
+            background: var(--bg-base);
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+        .ck-foto-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px;
+        }
+        .ck-foto-thumb .ck-foto-remove {
+            position: absolute;
+            top: 6px; right: 6px;
+            background: rgba(244,63,94,0.85);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px; height: 26px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+            backdrop-filter: blur(4px);
+        }
+        .ck-foto-thumb .ck-foto-remove:hover { background: var(--red); transform: scale(1.1); }
+        .ck-foto-thumb .ck-foto-caption {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.65);
+            color: #fff;
+            font-size: 0.68rem;
+            padding: 4px 6px;
+            text-align: center;
+            backdrop-filter: blur(2px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ck-foto-badge {
+            background: rgba(99,102,241,0.18);
+            color: var(--blue-light);
+            border: 1px solid var(--border-glow);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.73rem;
+            font-weight: 600;
+        }
+        /* Modal preview foto */
+        .ck-foto-modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 9999;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(6px);
+        }
+        .ck-foto-modal-overlay.open { display: flex; }
+        .ck-foto-modal-img {
+            max-width: 90vw; max-height: 85vh;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            object-fit: contain;
+        }
+        .ck-foto-modal-close {
+            position: absolute; top: 22px; right: 26px;
+            background: rgba(244,63,94,0.8);
+            color: white; border: none; border-radius: 50%;
+            width: 40px; height: 40px; font-size: 1.1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .ck-foto-modal-close:hover { background: var(--red); transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -445,6 +604,7 @@
         <button class="tab-btn" data-tab="tab-postos"><i class="fas fa-building"></i> Postos</button>
         <button class="tab-btn" data-tab="tab-bicofixo"><i class="fas fa-user-tie"></i> Bico Fixo</button>
         <button class="tab-btn" data-tab="tab-atestados"><i class="fas fa-file-medical"></i> Atestados</button>
+        <button class="tab-btn" data-tab="tab-checklist"><i class="fas fa-clipboard-check"></i> Checklist Supervisor</button>
     </div>
 
     <!-- ABA 1 - FOLGA TRABALHADA -->
@@ -953,6 +1113,176 @@
             </div>
         </div>
     </div>
+
+    <!-- ABA 8 - CHECKLIST SUPERVISOR -->
+    <div id="tab-checklist" class="tab-content">
+
+        <!-- CABEÇALHO DO CHECKLIST -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-clipboard-check"></i> Checklist de Inspeção — Supervisor</h2>
+                <span class="badge-status"><i class="fas fa-shield-alt"></i> Condomínios Predial &amp; Residencial</span>
+            </div>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Preencha os dados da visita antes de iniciar o checklist. Itens marcados como <strong>NOK</strong> devem ter observação registrada.
+            </div>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label><i class="fas fa-building"></i> Posto / Condomínio</label>
+                    <select id="ckPosto"><option value="">-- Selecione o posto --</option></select>
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-user-tie"></i> Supervisor Responsável</label>
+                    <input type="text" id="ckSupervisor" placeholder="Nome do supervisor">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-calendar-alt"></i> Data / Hora da Visita</label>
+                    <input type="datetime-local" id="ckDataHora">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-tag"></i> Tipo de Condomínio</label>
+                    <select id="ckTipo">
+                        <option value="predial">Predial</option>
+                        <option value="residencial">Residencial</option>
+                        <option value="misto">Misto</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SEÇÃO DE FOTOS -->
+            <div style="margin-top: 8px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                    <label style="font-weight:600; font-size:0.78rem; color:var(--gray-ms); display:flex; align-items:center; gap:7px; text-transform:uppercase; letter-spacing:0.4px;">
+                        <i class="fas fa-camera" style="color:var(--gold);width:16px;"></i> Fotos da Vistoria
+                    </label>
+                    <span class="ck-foto-badge" id="ckFotoBadge"><i class="fas fa-images"></i> 0 foto(s)</span>
+                </div>
+                <div class="ck-foto-upload-area" onclick="document.getElementById('ckFotoInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p><strong>Clique para adicionar fotos</strong> ou arraste aqui</p>
+                    <small>JPG, PNG, WEBP · Máx. 10 MB por foto · Múltiplas permitidas</small>
+                </div>
+                <input type="file" id="ckFotoInput" accept="image/*" multiple style="display:none;" onchange="adicionarFotosChecklist(this)">
+                <div class="ck-fotos-grid" id="ckFotosGrid"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--blue-main);">
+                <h2><i class="fas fa-door-open"></i> 1. Portaria &amp; Controle de Acesso</h2>
+                <span id="ck-score-portaria" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-portaria" class="ck-section"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--purple);">
+                <h2><i class="fas fa-user-shield"></i> 2. Vigilante / Colaborador</h2>
+                <span id="ck-score-vigilante" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-vigilante" class="ck-section"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--gold);">
+                <h2><i class="fas fa-hard-hat"></i> 3. Equipamentos &amp; EPIs</h2>
+                <span id="ck-score-epi" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-epi" class="ck-section"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--cyan);">
+                <h2><i class="fas fa-building"></i> 4. Áreas Comuns</h2>
+                <span id="ck-score-areas" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-areas" class="ck-section"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--red);">
+                <h2><i class="fas fa-lock"></i> 5. Segurança Predial</h2>
+                <span id="ck-score-seg" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-seg" class="ck-section"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--orange);">
+                <h2><i class="fas fa-book"></i> 6. Comunicação &amp; Registros</h2>
+                <span id="ck-score-comm" style="font-size:0.85rem;color:var(--green);font-weight:700;">OK: 0 | NOK: 0</span>
+            </div>
+            <div id="ck-items-comm" class="ck-section"></div>
+        </div>
+
+        <!-- RESULTADO GERAL -->
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--green);">
+                <h2><i class="fas fa-chart-pie"></i> Resultado da Inspeção</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
+                <div class="stat-card stat-card-val">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-value" id="ckTotalOk">0</div>
+                    <div class="stat-label">Itens OK</div>
+                </div>
+                <div class="stat-card stat-card-at">
+                    <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-value" id="ckTotalNok">0</div>
+                    <div class="stat-label">Itens NOK</div>
+                </div>
+                <div class="stat-card stat-card-ft">
+                    <div class="stat-icon"><i class="fas fa-minus-circle"></i></div>
+                    <div class="stat-value" id="ckTotalNa">0</div>
+                    <div class="stat-label">Itens N/A</div>
+                </div>
+                <div class="stat-card stat-card-func">
+                    <div class="stat-icon"><i class="fas fa-percent"></i></div>
+                    <div class="stat-value" id="ckPorcentagem">—</div>
+                    <div class="stat-label">Conformidade</div>
+                </div>
+            </div>
+            <div style="background:var(--bg-card2);border-radius:12px;height:20px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border);">
+                <div id="ckProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--green-bright));border-radius:12px;transition:width 0.5s ease;"></div>
+            </div>
+            <div id="ckClassificacao" style="text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:24px;padding:14px;border-radius:16px;background:var(--bg-card2);border:1px solid var(--border);">
+                Aguardando preenchimento…
+            </div>
+            <div class="input-group" style="margin-bottom:20px;">
+                <label><i class="fas fa-comments"></i> Observações Gerais do Supervisor</label>
+                <textarea id="ckObsGeral" rows="4" placeholder="Observações gerais, pendências, planos de ação…" style="resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <button class="btn-primary" onclick="calcularChecklist()"><i class="fas fa-calculator"></i> Calcular Resultado</button>
+                <button class="btn-success" onclick="exportarChecklistPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                <button class="btn-secondary" onclick="resetChecklist()"><i class="fas fa-undo-alt"></i> Limpar Checklist</button>
+            </div>
+        </div>
+
+        <!-- HISTÓRICO -->
+        <div class="card">
+            <div class="card-header" style="border-left-color:var(--blue-light);">
+                <h2><i class="fas fa-history"></i> Histórico de Vistorias</h2>
+                <button class="btn-primary" onclick="salvarChecklist()"><i class="fas fa-save"></i> Salvar Vistoria</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table" id="ckHistoricoTable">
+                    <thead><tr><th>Data/Hora</th><th>Posto</th><th>Supervisor</th><th>Tipo</th><th>OK</th><th>NOK</th><th>N/A</th><th>Conformidade</th><th>Classificação</th><th>Ações</th></tr></thead>
+                    <tbody id="ckHistoricoBody"><tr><td colspan="10" class="empty-row"><i class="fas fa-clipboard"></i> Nenhuma vistoria salva ainda</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <!-- FIM ABA CHECKLIST -->
+</div>
+
+<!-- MODAL PREVIEW FOTO CHECKLIST -->
+<div class="ck-foto-modal-overlay" id="ckFotoModalOverlay" onclick="fecharFotoModal(event)">
+    <button class="ck-foto-modal-close" onclick="document.getElementById('ckFotoModalOverlay').classList.remove('open')">
+        <i class="fas fa-times"></i>
+    </button>
+    <img class="ck-foto-modal-img" id="ckFotoModalImg" src="" alt="Foto da vistoria">
 </div>
 <script>
     // ══════════════════════════════════════════════════════════
@@ -2521,6 +2851,486 @@
 
         doc.save(`bico_fixo_${Date.now()}.pdf`);
     }
+    // ════════════════════════════════════════════════════════════
+    //  MÓDULO: CHECKLIST DO SUPERVISOR
+    // ════════════════════════════════════════════════════════════
+
+    const CK_SECTIONS = {
+        portaria: {
+            label: 'Portaria & Controle de Acesso',
+            scoreId: 'ck-score-portaria',
+            containerId: 'ck-items-portaria',
+            items: [
+                { id:'p1', label:'Portão/cancela principal em funcionamento', hint:'Verifique se abre/fecha corretamente e sem travamentos' },
+                { id:'p2', label:'Interfone/interfonia funcionando', hint:'Teste comunicação interna e externa' },
+                { id:'p3', label:'Câmeras de acesso operacionais', hint:'Verificar imagem, ângulo e armazenamento' },
+                { id:'p4', label:'Livro de registro de visitantes atualizado', hint:'Entradas e saídas devidamente anotadas' },
+                { id:'p5', label:'Controle de chaves organizado e atualizado', hint:'Verificar planilha/painel de chaves' },
+                { id:'p6', label:'Acesso de veículos controlado adequadamente', hint:'Registro de placas e autorização' },
+                { id:'p7', label:'Iluminação da portaria funcionando', hint:'Lâmpadas, luminárias e emergências' },
+                { id:'p8', label:'Área da guarita limpa e organizada', hint:'Sem objetos pessoais em excesso, lixo recolhido' },
+            ]
+        },
+        vigilante: {
+            label: 'Vigilante / Colaborador',
+            scoreId: 'ck-score-vigilante',
+            containerId: 'ck-items-vigilante',
+            items: [
+                { id:'v1', label:'Vigilante presente no posto', hint:'Não ausentado sem cobertura' },
+                { id:'v2', label:'Uniformizado corretamente', hint:'Camisa, calça, cinto e boné padronizados' },
+                { id:'v3', label:'Postura e apresentação adequadas', hint:'Sem uso excessivo de celular, atento ao posto' },
+                { id:'v4', label:'Documentos pessoais em dia (CNV, etc.)', hint:'Carteira Nacional de Vigilante válida' },
+                { id:'v5', label:'Conhece o plano de emergência do posto', hint:'Procedimento em caso de incêndio, roubo, etc.' },
+                { id:'v6', label:'Conhece os moradores/funcionários habituais', hint:'Identifica acessos autorizados' },
+                { id:'v7', label:'Sem sinais de cansaço excessivo ou sonolência', hint:'Colaborador alerta e responsivo' },
+                { id:'v8', label:'Ronda interna realizada conforme escala', hint:'Registros de ronda presentes' },
+            ]
+        },
+        epi: {
+            label: 'Equipamentos & EPIs',
+            scoreId: 'ck-score-epi',
+            containerId: 'ck-items-epi',
+            items: [
+                { id:'e1', label:'Colete à prova de balas disponível (se aplicável)', hint:'Verificar validade e conservação' },
+                { id:'e2', label:'Rádio comunicador / celular corporativo carregado', hint:'Bateria >50% e funcionamento testado' },
+                { id:'e3', label:'Detector de metais portátil operacional', hint:'Bateria e funcionamento' },
+                { id:'e4', label:'Lanterna em bom estado', hint:'Pilhas novas ou carregada' },
+                { id:'e5', label:'Extintor de incêndio na portaria (carga válida)', hint:'Verificar validade e pressão do manômetro' },
+                { id:'e6', label:'Kit de primeiros socorros disponível', hint:'Caixa completa com materiais válidos' },
+                { id:'e7', label:'Computador/sistema de controle funcionando', hint:'Registro eletrônico de acesso operacional' },
+            ]
+        },
+        areas: {
+            label: 'Áreas Comuns',
+            scoreId: 'ck-score-areas',
+            containerId: 'ck-items-areas',
+            items: [
+                { id:'a1', label:'Hall de entrada limpo e iluminado', hint:'Piso, paredes, luminárias' },
+                { id:'a2', label:'Corredores e halls dos andares limpos', hint:'Ausência de lixo, entulho ou objetos abandonados' },
+                { id:'a3', label:'Elevadores em funcionamento', hint:'Chamada, portas, botões, iluminação interna' },
+                { id:'a4', label:'Escadas de emergência desobstruídas', hint:'Sem objetos bloqueando passagem' },
+                { id:'a5', label:'Área de lazer (piscina, salão, etc.) em ordem', hint:'Limpa, equipada e com acesso controlado' },
+                { id:'a6', label:'Estacionamento organizado e sinalizado', hint:'Vagas demarcadas, sem veículos irregulares' },
+                { id:'a7', label:'Lixeiras e coletores adequados e tampados', hint:'Lixo triado e em áreas corretas' },
+                { id:'a8', label:'Jardins e áreas externas conservados', hint:'Plantas podadas, sem entulho' },
+            ]
+        },
+        seg: {
+            label: 'Segurança Predial',
+            scoreId: 'ck-score-seg',
+            containerId: 'ck-items-seg',
+            items: [
+                { id:'s1', label:'Sistema de alarme ativo e testado', hint:'Painel, sirenes e sensores operacionais' },
+                { id:'s2', label:'CFTV com gravação funcionando', hint:'DVR/NVR gravando, todas as câmeras ativas' },
+                { id:'s3', label:'Cercas/muros sem avarias', hint:'Sem buracos, escaladas ou danos visíveis' },
+                { id:'s4', label:'Iluminação externa perimetral funcionando', hint:'Postes, refletores, sensores de presença' },
+                { id:'s5', label:'Portões laterais e fundos travados/monitorados', hint:'Acesso restrito e registrado' },
+                { id:'s6', label:'Plano de contingência afixado na portaria', hint:'Procedimentos visíveis e atualizados' },
+                { id:'s7', label:'Contatos de emergência atualizados', hint:'Bombeiros, SAMU, polícia, síndico, empresa' },
+            ]
+        },
+        comm: {
+            label: 'Comunicação & Registros',
+            scoreId: 'ck-score-comm',
+            containerId: 'ck-items-comm',
+            items: [
+                { id:'c1', label:'Livro de ocorrências atualizado', hint:'Registros legíveis, sem rasuras, assinados' },
+                { id:'c2', label:'Comunicações do turno anterior revisadas', hint:'Pendências identificadas e tratadas' },
+                { id:'c3', label:'Ordens de serviço do condomínio arquivadas', hint:'Circulares, comunicados e atas acessíveis' },
+                { id:'c4', label:'Supervisor contactável durante o turno', hint:'Número atualizado e comunicado ao vigilante' },
+                { id:'c5', label:'Passagem de plantão feita formalmente', hint:'Registro da passagem com horário e assinatura' },
+                { id:'c6', label:'Relatório diário de ronda preenchido', hint:'Todas as rondas registradas com hora e assinatura' },
+            ]
+        }
+    };
+
+    let ckState = {};
+    let ckHistorico = [];
+    let ckNextId = 1;
+    let ckFotos = []; // Array de { dataUrl, name }
+
+    function adicionarFotosChecklist(input) {
+        const files = Array.from(input.files);
+        if (!files.length) return;
+        let loaded = 0;
+        files.forEach(file => {
+            if (file.size > 10 * 1024 * 1024) {
+                alert(`Foto "${file.name}" excede 10 MB e foi ignorada.`);
+                loaded++;
+                if (loaded === files.length) { input.value = ''; renderCkFotos(); }
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                ckFotos.push({ dataUrl: e.target.result, name: file.name });
+                loaded++;
+                if (loaded === files.length) { input.value = ''; renderCkFotos(); }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderCkFotos() {
+        const grid = document.getElementById('ckFotosGrid');
+        const badge = document.getElementById('ckFotoBadge');
+        if (!grid) return;
+        if (badge) badge.innerHTML = `<i class="fas fa-images"></i> ${ckFotos.length} foto(s)`;
+        if (!ckFotos.length) { grid.innerHTML = ''; return; }
+        grid.innerHTML = ckFotos.map((f, i) => `
+            <div class="ck-foto-thumb" title="${escapeHtml(f.name)}">
+                <img src="${f.dataUrl}" alt="Foto ${i+1}" onclick="abrirFotoModal('${f.dataUrl}')">
+                <button class="ck-foto-remove" title="Remover foto" onclick="removerFotoChecklist(${i})">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="ck-foto-caption">Foto ${i+1}</div>
+            </div>
+        `).join('');
+        // Drag-and-drop re-drop support
+        const area = document.querySelector('.ck-foto-upload-area');
+        if (area) {
+            area.ondragover = e => { e.preventDefault(); area.style.borderColor='var(--blue-main)'; };
+            area.ondragleave = () => { area.style.borderColor=''; };
+            area.ondrop = e => {
+                e.preventDefault(); area.style.borderColor='';
+                const dt = e.dataTransfer;
+                if (dt && dt.files.length) adicionarFotosChecklist({ files: dt.files, value: '' });
+            };
+        }
+    }
+
+    function removerFotoChecklist(idx) {
+        ckFotos.splice(idx, 1);
+        renderCkFotos();
+    }
+
+    function abrirFotoModal(dataUrl) {
+        const overlay = document.getElementById('ckFotoModalOverlay');
+        const img = document.getElementById('ckFotoModalImg');
+        if (!overlay || !img) return;
+        img.src = dataUrl;
+        overlay.classList.add('open');
+    }
+
+    function fecharFotoModal(event) {
+        const overlay = document.getElementById('ckFotoModalOverlay');
+        if (!overlay) return;
+        if (event.target === overlay) overlay.classList.remove('open');
+    }
+
+    function initChecklist() {
+        const sel = document.getElementById('ckPosto');
+        if (sel) {
+            sel.innerHTML = '<option value="">-- Selecione o posto --</option>' +
+                postos.map(p => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join('');
+        }
+        Object.entries(CK_SECTIONS).forEach(([key, sec]) => {
+            const container = document.getElementById(sec.containerId);
+            if (!container || container.children.length) return;
+            container.innerHTML = sec.items.map(item => `
+                <div class="ck-item" id="ck-wrap-${item.id}">
+                    <div class="ck-item-label">
+                        ${escapeHtml(item.label)}
+                        ${item.hint ? `<small>${escapeHtml(item.hint)}</small>` : ''}
+                    </div>
+                    <div class="ck-btns">
+                        <button class="ck-btn" onclick="setCkItem('${item.id}','ok','${key}')"><i class="fas fa-check"></i> OK</button>
+                        <button class="ck-btn" onclick="setCkItem('${item.id}','nok','${key}')"><i class="fas fa-times"></i> NOK</button>
+                        <button class="ck-btn" onclick="setCkItem('${item.id}','na','${key}')">N/A</button>
+                    </div>
+                    <div class="ck-obs-wrap" id="ck-obs-wrap-${item.id}" style="display:none;">
+                        <input type="text" id="ck-obs-${item.id}" placeholder="Observação obrigatória para NOK…">
+                    </div>
+                </div>
+            `).join('');
+        });
+        const dh = document.getElementById('ckDataHora');
+        if (dh && !dh.value) {
+            const now = new Date();
+            dh.value = now.toISOString().slice(0,16);
+        }
+        // Setup drag-and-drop na área de fotos
+        setTimeout(() => {
+            const area = document.querySelector('.ck-foto-upload-area');
+            if (area) {
+                area.ondragover = e => { e.preventDefault(); area.style.borderColor='var(--blue-main)'; area.style.background='rgba(99,102,241,0.1)'; };
+                area.ondragleave = () => { area.style.borderColor=''; area.style.background=''; };
+                area.ondrop = e => {
+                    e.preventDefault(); area.style.borderColor=''; area.style.background='';
+                    if (e.dataTransfer && e.dataTransfer.files.length) adicionarFotosChecklist({ files: e.dataTransfer.files, value: '' });
+                };
+            }
+        }, 100);
+    }
+
+    function setCkItem(itemId, status, sectionKey) {
+        ckState[itemId] = status;
+        const wrap = document.getElementById('ck-wrap-' + itemId);
+        const obsWrap = document.getElementById('ck-obs-wrap-' + itemId);
+        if (!wrap) return;
+        wrap.className = 'ck-item ck-' + status;
+        const btns = wrap.querySelectorAll('.ck-btn');
+        btns.forEach(b => b.className = 'ck-btn');
+        const map = { ok:0, nok:1, na:2 };
+        if (btns[map[status]]) btns[map[status]].className = 'ck-btn active-' + status;
+        if (obsWrap) obsWrap.style.display = status === 'nok' ? 'block' : 'none';
+        updateCkScore(sectionKey);
+        calcularChecklist();
+    }
+
+    function updateCkScore(sectionKey) {
+        const sec = CK_SECTIONS[sectionKey];
+        if (!sec) return;
+        let ok = 0, nok = 0;
+        sec.items.forEach(item => {
+            if (ckState[item.id] === 'ok') ok++;
+            else if (ckState[item.id] === 'nok') nok++;
+        });
+        const el = document.getElementById(sec.scoreId);
+        if (el) {
+            el.textContent = `OK: ${ok} | NOK: ${nok}`;
+            el.style.color = nok > 0 ? 'var(--red)' : ok > 0 ? 'var(--green)' : 'var(--text-sub)';
+        }
+    }
+
+    function calcularChecklist() {
+        let totalOk = 0, totalNok = 0, totalNa = 0;
+        Object.values(ckState).forEach(v => {
+            if (v === 'ok') totalOk++;
+            else if (v === 'nok') totalNok++;
+            else if (v === 'na') totalNa++;
+        });
+        const avaliados = totalOk + totalNok;
+        const pct = avaliados > 0 ? Math.round((totalOk / avaliados) * 100) : null;
+        document.getElementById('ckTotalOk').textContent = totalOk;
+        document.getElementById('ckTotalNok').textContent = totalNok;
+        document.getElementById('ckTotalNa').textContent = totalNa;
+        document.getElementById('ckPorcentagem').textContent = pct !== null ? pct + '%' : '—';
+        const bar = document.getElementById('ckProgressBar');
+        if (bar) {
+            bar.style.width = (pct || 0) + '%';
+            if (pct >= 90) bar.style.background = 'linear-gradient(90deg,#10b981,#34d399)';
+            else if (pct >= 70) bar.style.background = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+            else bar.style.background = 'linear-gradient(90deg,#f43f5e,#fb7185)';
+        }
+        const cls = document.getElementById('ckClassificacao');
+        if (cls && pct !== null) {
+            let label, color;
+            if (pct >= 90) { label = '✅ EXCELENTE — Posto em plena conformidade'; color = '#10b981'; }
+            else if (pct >= 75) { label = '🟡 BOM — Pequenas irregularidades a corrigir'; color = '#f59e0b'; }
+            else if (pct >= 60) { label = '🟠 REGULAR — Atenção requerida em vários pontos'; color = '#f97316'; }
+            else { label = '🔴 CRÍTICO — Irregularidades graves — ação imediata'; color = '#f43f5e'; }
+            cls.textContent = label;
+            cls.style.color = color;
+            cls.style.borderColor = color + '55';
+        }
+    }
+
+    function salvarChecklist() {
+        const posto = document.getElementById('ckPosto');
+        const postoNome = posto ? posto.options[posto.selectedIndex]?.text || '—' : '—';
+        const supervisor = document.getElementById('ckSupervisor')?.value || '—';
+        const dataHora = document.getElementById('ckDataHora')?.value || new Date().toISOString().slice(0,16);
+        const tipo = document.getElementById('ckTipo')?.value || 'predial';
+        const obsGeral = document.getElementById('ckObsGeral')?.value || '';
+        let totalOk = 0, totalNok = 0, totalNa = 0;
+        Object.values(ckState).forEach(v => {
+            if (v === 'ok') totalOk++;
+            else if (v === 'nok') totalNok++;
+            else if (v === 'na') totalNa++;
+        });
+        const avaliados = totalOk + totalNok;
+        const pct = avaliados > 0 ? Math.round((totalOk / avaliados) * 100) : 0;
+        const classi = pct >= 90 ? 'Excelente' : pct >= 75 ? 'Bom' : pct >= 60 ? 'Regular' : 'Crítico';
+        const noks = [];
+        Object.entries(ckState).forEach(([id, v]) => {
+            if (v === 'nok') {
+                const obs = document.getElementById('ck-obs-' + id)?.value || '';
+                let lbl = id;
+                Object.values(CK_SECTIONS).forEach(sec => {
+                    const item = sec.items.find(i => i.id === id);
+                    if (item) lbl = item.label;
+                });
+                noks.push({ id, label: lbl, obs });
+            }
+        });
+        const registro = { id: ckNextId++, dataHora, postoNome, supervisor, tipo, totalOk, totalNok, totalNa, pct, classi, obsGeral, noks };
+        ckHistorico.unshift(registro);
+        renderCkHistorico();
+        alert('Vistoria salva com sucesso!');
+    }
+
+    function renderCkHistorico() {
+        const tbody = document.getElementById('ckHistoricoBody');
+        if (!tbody) return;
+        if (!ckHistorico.length) {
+            tbody.innerHTML = '<tr><td colspan="10" class="empty-row"><i class="fas fa-clipboard"></i> Nenhuma vistoria salva ainda</td></tr>';
+            return;
+        }
+        const cores = { 'Excelente':'#10b981', 'Bom':'#f59e0b', 'Regular':'#f97316', 'Crítico':'#f43f5e' };
+        tbody.innerHTML = ckHistorico.map(r => `
+            <tr>
+                <td>${(r.dataHora||'—').replace('T',' ')}</td>
+                <td>${escapeHtml(r.postoNome)}</td>
+                <td>${escapeHtml(r.supervisor)}</td>
+                <td style="text-transform:capitalize">${escapeHtml(r.tipo)}</td>
+                <td style="color:var(--green);font-weight:700">${r.totalOk}</td>
+                <td style="color:var(--red);font-weight:700">${r.totalNok}</td>
+                <td style="color:var(--text-dim)">${r.totalNa}</td>
+                <td style="font-weight:700">${r.pct}%</td>
+                <td style="color:${cores[r.classi]||'#fff'};font-weight:700">${r.classi}</td>
+                <td class="action-icons">
+                    <i class="fas fa-trash-alt" title="Excluir" onclick="excluirRegistroCk(${r.id})"></i>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function excluirRegistroCk(id) {
+        if (!confirm('Excluir esta vistoria?')) return;
+        ckHistorico = ckHistorico.filter(r => r.id !== id);
+        renderCkHistorico();
+    }
+
+    function resetChecklist() {
+        if (!confirm('Limpar todos os itens do checklist atual?')) return;
+        ckState = {};
+        document.querySelectorAll('.ck-item').forEach(el => {
+            el.className = 'ck-item';
+            el.querySelectorAll('.ck-btn').forEach(b => b.className = 'ck-btn');
+        });
+        document.querySelectorAll('.ck-obs-wrap').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.ck-obs-wrap input').forEach(el => el.value = '');
+        const og = document.getElementById('ckObsGeral'); if(og) og.value = '';
+        Object.keys(CK_SECTIONS).forEach(k => {
+            const el = document.getElementById(CK_SECTIONS[k].scoreId);
+            if (el) { el.textContent = 'OK: 0 | NOK: 0'; el.style.color = 'var(--text-sub)'; }
+        });
+        document.getElementById('ckTotalOk').textContent = '0';
+        document.getElementById('ckTotalNok').textContent = '0';
+        document.getElementById('ckTotalNa').textContent = '0';
+        document.getElementById('ckPorcentagem').textContent = '—';
+        document.getElementById('ckProgressBar').style.width = '0%';
+        const cls = document.getElementById('ckClassificacao');
+        if(cls) { cls.textContent = 'Aguardando preenchimento…'; cls.style.color='var(--text-sub)'; }
+        // Limpar fotos
+        ckFotos = [];
+        renderCkFotos();
+    }
+
+    async function exportarChecklistPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p','mm','a4');
+        const pw = doc.internal.pageSize.getWidth() - 28;
+        let y = 10;
+        doc.setFillColor(14,24,41);
+        doc.rect(0,0,doc.internal.pageSize.getWidth(),22,'F');
+        doc.setTextColor(247,179,43); doc.setFontSize(13); doc.setFont(undefined,'bold');
+        doc.text('GRUPO MS — Checklist de Inspecao', 14, 14);
+        const posto = document.getElementById('ckPosto');
+        const postoNome = posto ? (posto.options[posto.selectedIndex]?.text || '—') : '—';
+        const supervisor = document.getElementById('ckSupervisor')?.value || '—';
+        const dataHora = (document.getElementById('ckDataHora')?.value || '—').replace('T',' ');
+        const tipo = document.getElementById('ckTipo')?.value || '—';
+        const obsGeral = document.getElementById('ckObsGeral')?.value || '';
+        const pctEl = document.getElementById('ckPorcentagem')?.textContent || '—';
+        const classiRaw = document.getElementById('ckClassificacao')?.textContent || '—';
+        const classi = classiRaw.replace(/[^\x00-\x7F]/g,'').trim();
+        doc.setTextColor(255,255,255); doc.setFontSize(8);
+        doc.text('Data: ' + dataHora, pw+14, 14, {align:'right'});
+        y = 30;
+        doc.setFillColor(22,29,46);
+        doc.rect(14, y, pw, 28, 'F');
+        doc.setTextColor(180,190,210); doc.setFontSize(8); doc.setFont(undefined,'normal');
+        doc.text('Posto: ' + postoNome, 18, y+7);
+        doc.text('Supervisor: ' + supervisor, 18, y+14);
+        doc.text('Tipo: ' + tipo, 18, y+21);
+        doc.text('Conformidade: ' + pctEl, pw/2+14, y+7);
+        doc.text('Classificacao: ' + classi, pw/2+14, y+14);
+        y += 36;
+        Object.values(CK_SECTIONS).forEach(sec => {
+            if (y + 15 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(30,64,112);
+            doc.rect(14, y, pw, 9, 'F');
+            doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont(undefined,'bold');
+            doc.text(sec.label, 18, y+6);
+            y += 11;
+            sec.items.forEach(item => {
+                if (y + 9 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+                const status = ckState[item.id] || '';
+                const obs = document.getElementById('ck-obs-' + item.id)?.value || '';
+                const bg = status === 'ok' ? [16,66,45] : status === 'nok' ? [66,16,28] : [30,40,60];
+                doc.setFillColor(...bg);
+                doc.rect(14, y, pw, 8, 'F');
+                doc.setTextColor(220,230,240); doc.setFontSize(7.5); doc.setFont(undefined,'normal');
+                doc.text(item.label, 18, y+5.5, {maxWidth: pw-40});
+                const statusLabel = status === 'ok' ? 'OK' : status === 'nok' ? 'NOK' : 'N/A';
+                const sc = status === 'ok' ? [52,211,153] : status === 'nok' ? [251,113,133] : [100,116,139];
+                doc.setTextColor(...sc); doc.setFont(undefined,'bold');
+                doc.text(statusLabel, pw+12, y+5.5, {align:'right'});
+                y += 8;
+                if (status === 'nok' && obs) {
+                    if (y + 7 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+                    doc.setFillColor(50,20,30);
+                    doc.rect(14, y, pw, 7, 'F');
+                    doc.setTextColor(251,113,133); doc.setFontSize(7); doc.setFont(undefined,'italic');
+                    doc.text('Obs: ' + obs, 18, y+4.5, {maxWidth: pw-10});
+                    y += 7;
+                }
+            });
+            y += 4;
+        });
+        if (obsGeral) {
+            if (y + 20 > doc.internal.pageSize.getHeight() - 20) { doc.addPage(); y = 20; }
+            doc.setFillColor(22,29,46);
+            doc.rect(14, y, pw, 20, 'F');
+            doc.setTextColor(247,179,43); doc.setFontSize(8); doc.setFont(undefined,'bold');
+            doc.text('Observacoes Gerais:', 18, y+6);
+            doc.setTextColor(220,230,240); doc.setFont(undefined,'normal'); doc.setFontSize(7.5);
+            const obsLines = doc.splitTextToSize(obsGeral, pw-10);
+            doc.text(obsLines, 18, y+12);
+            y += 24;
+        }
+        // ── FOTOS DA VISTORIA ──
+        if (ckFotos.length > 0) {
+            doc.addPage();
+            let fy = 16;
+            doc.setFillColor(14,24,41);
+            doc.rect(0,0,doc.internal.pageSize.getWidth(),18,'F');
+            doc.setTextColor(247,179,43); doc.setFontSize(11); doc.setFont(undefined,'bold');
+            doc.text('FOTOS DA VISTORIA (' + ckFotos.length + ')', 14, 12);
+            fy = 26;
+            const imgW = (pw - 6) / 2;
+            const imgH = imgW * 0.72;
+            let col = 0;
+            for (let i = 0; i < ckFotos.length; i++) {
+                const x = 14 + col * (imgW + 6);
+                if (fy + imgH + 14 > doc.internal.pageSize.getHeight() - 14) {
+                    doc.addPage(); fy = 16; col = 0;
+                }
+                try {
+                    doc.addImage(ckFotos[i].dataUrl, 'JPEG', x, fy, imgW, imgH, undefined, 'MEDIUM');
+                } catch(e) {
+                    doc.setFillColor(30,40,60);
+                    doc.rect(x, fy, imgW, imgH, 'F');
+                    doc.setTextColor(100,120,150); doc.setFontSize(7);
+                    doc.text('[Foto ' + (i+1) + ']', x + imgW/2, fy + imgH/2, {align:'center'});
+                }
+                doc.setTextColor(180,190,210); doc.setFontSize(6.5); doc.setFont(undefined,'normal');
+                doc.text('Foto ' + (i+1), x + imgW/2, fy + imgH + 5, {align:'center'});
+                col++;
+                if (col >= 2) { col = 0; fy += imgH + 14; }
+            }
+        }
+        doc.save('checklist_supervisor_' + Date.now() + '.pdf');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const ckTab = document.querySelector('[data-tab="tab-checklist"]');
+        if (ckTab) {
+            ckTab.addEventListener('click', () => setTimeout(initChecklist, 50));
+        }
+    });
+
 </script>
 </body>
 </html>
