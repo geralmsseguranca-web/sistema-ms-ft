@@ -65,23 +65,33 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg-deep:    #07090f;
-            --bg-base:    #0c101a;
-            --bg-card:    #111827;
-            --bg-card2:   #161d2e;
-            --bg-hover:   #1a2238;
-            --border:     rgba(45,92,166,0.18);
-            --border-glow:rgba(45,92,166,0.35);
-            --blue-main:  #2d5ca6;
-            --blue-light: #3a74cc;
-            --blue-dark:  #1e4070;
-            --gray-ms:    #8b9db5;
-            --gold:       #f7b32b;
+            --bg-deep:    #060810;
+            --bg-base:    #0a0d18;
+            --bg-card:    #0f1623;
+            --bg-card2:   #141c2e;
+            --bg-hover:   #192035;
+            --border:     rgba(99,102,241,0.18);
+            --border-glow:rgba(99,102,241,0.42);
+            --blue-main:  #6366f1;
+            --blue-light: #818cf8;
+            --blue-dark:  #4338ca;
+            --gray-ms:    #94a3b8;
+            --gold:       #f59e0b;
+            --gold-bright:#fbbf24;
             --green:      #10b981;
-            --red:        #ef4444;
-            --text-main:  #e2e8f0;
-            --text-sub:   #8b9db5;
-            --text-dim:   #4a5a72;
+            --green-bright:#34d399;
+            --red:        #f43f5e;
+            --red-soft:   #fb7185;
+            --purple:     #a855f7;
+            --cyan:       #06b6d4;
+            --orange:     #f97316;
+            --text-main:  #f1f5f9;
+            --text-sub:   #94a3b8;
+            --text-dim:   #475569;
+            --accent1:    #6366f1;
+            --accent2:    #f59e0b;
+            --accent3:    #10b981;
+            --accent4:    #f43f5e;
         }
 
         body {
@@ -96,11 +106,11 @@
 
         /* ── HEADER ── */
         .header {
-            background: linear-gradient(135deg, #0e1829 0%, #111f36 100%);
+            background: linear-gradient(135deg, #0b0f1e 0%, #0f1730 50%, #130d2a 100%);
             border-radius: 24px;
             padding: 18px 28px;
             margin-bottom: 24px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px var(--border), 0 0 60px rgba(99,102,241,0.06);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -136,18 +146,18 @@
         }
 
         .badge-ms {
-            background: rgba(45,92,166,0.18);
+            background: rgba(99,102,241,0.15);
             padding: 9px 18px;
             border-radius: 100px;
             font-size: 0.78rem;
             font-weight: 600;
-            color: #7aaeff;
+            color: #a5b4fc;
             border: 1px solid var(--border-glow);
         }
         .sync-badge { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.3); }
-        .sync-badge.connecting { background: rgba(247,179,43,0.1); color: #f7b32b; border-color: rgba(247,179,43,0.3); animation: pulse 1.5s infinite; }
-        .sync-badge.error { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); }
-        .sync-badge.offline { background: rgba(139,93,180,0.15); color: #c084fc; border-color: rgba(139,93,180,0.4); animation: pulse 2s infinite; }
+        .sync-badge.connecting { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.3); animation: pulse 1.5s infinite; }
+        .sync-badge.error { background: rgba(244,63,94,0.1); color: #fb7185; border-color: rgba(244,63,94,0.3); }
+        .sync-badge.offline { background: rgba(168,85,247,0.15); color: #c084fc; border-color: rgba(168,85,247,0.4); animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
         /* ── TABS ── */
@@ -171,7 +181,7 @@
             background: linear-gradient(135deg, var(--blue-main) 0%, var(--blue-dark) 100%);
             color: white;
             border-color: var(--blue-main);
-            box-shadow: 0 4px 16px rgba(45,92,166,0.4);
+            box-shadow: 0 4px 20px rgba(99,102,241,0.45), 0 0 0 1px rgba(99,102,241,0.3);
         }
 
         .tab-content { display: none; animation: fade 0.28s ease; }
@@ -195,7 +205,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 22px;
-            border-left: 5px solid var(--gold);
+            border-left: 5px solid var(--gold-bright);
             padding-left: 18px;
             flex-wrap: wrap;
             gap: 12px;
@@ -264,9 +274,9 @@
             align-items: center;
             gap: 9px;
             transition: all 0.2s;
-            box-shadow: 0 2px 10px rgba(45,92,166,0.3);
+            box-shadow: 0 2px 12px rgba(99,102,241,0.4);
         }
-        button.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(45,92,166,0.5); filter: brightness(1.1); }
+        button.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(99,102,241,0.55); filter: brightness(1.12); }
 
         button.btn-secondary {
             background: var(--bg-card2);
@@ -332,14 +342,30 @@
             background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card2) 100%);
             border-radius: 22px;
             padding: 22px 18px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
             border: 1px solid var(--border);
-            transition: all 0.25s;
+            transition: all 0.28s;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(45,92,166,0.2), 0 0 0 1px var(--border-glow); }
-        .stat-card .stat-icon { font-size: 2rem; color: var(--gold); margin-bottom: 12px; }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--card-accent, var(--blue-main)), transparent);
+            border-radius: 22px 22px 0 0;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--border-glow); }
+        .stat-card .stat-icon { font-size: 2rem; color: var(--card-accent, var(--gold)); margin-bottom: 12px; }
         .stat-card .stat-value { font-size: 1.9rem; font-weight: 800; color: #fff; }
         .stat-card .stat-label { font-size: 0.75rem; color: var(--text-sub); margin-top: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card-ft   { --card-accent: #6366f1; }
+        .stat-card-val  { --card-accent: #10b981; }
+        .stat-card-mov  { --card-accent: #f59e0b; }
+        .stat-card-func { --card-accent: #06b6d4; }
+        .stat-card-bico { --card-accent: #a855f7; }
+        .stat-card-at   { --card-accent: #f43f5e; }
 
         .filter-bar {
             background: var(--bg-card2);
@@ -574,12 +600,12 @@
             </div>
 
             <div class="dashboard-cards">
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-value" id="totalFtCard">0</div><div class="stat-label">Total de FT</div></div>
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-dollar-sign"></i></div><div class="stat-value" id="totalValorCard">R$ 0</div><div class="stat-label">Valor Total</div></div>
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-exchange-alt"></i></div><div class="stat-value" id="totalMovCard">0</div><div class="stat-label">Movimentações</div></div>
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-value" id="totalFuncCard">0</div><div class="stat-label">Funcionários</div></div>
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-tie"></i></div><div class="stat-value" id="totalBicoCard">0</div><div class="stat-label">Bico Fixo</div></div>
-                <div class="stat-card"><div class="stat-icon"><i class="fas fa-file-medical"></i></div><div class="stat-value" id="totalAtestadoCard">0</div><div class="stat-label">Atestados</div></div>
+                <div class="stat-card stat-card-ft"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-value" id="totalFtCard">0</div><div class="stat-label">Total de FT</div></div>
+                <div class="stat-card stat-card-val"><div class="stat-icon"><i class="fas fa-dollar-sign"></i></div><div class="stat-value" id="totalValorCard">R$ 0</div><div class="stat-label">Valor Total</div></div>
+                <div class="stat-card stat-card-mov"><div class="stat-icon"><i class="fas fa-exchange-alt"></i></div><div class="stat-value" id="totalMovCard">0</div><div class="stat-label">Movimentações</div></div>
+                <div class="stat-card stat-card-func"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-value" id="totalFuncCard">0</div><div class="stat-label">Funcionários</div></div>
+                <div class="stat-card stat-card-bico"><div class="stat-icon"><i class="fas fa-user-tie"></i></div><div class="stat-value" id="totalBicoCard">0</div><div class="stat-label">Bico Fixo</div></div>
+                <div class="stat-card stat-card-at"><div class="stat-icon"><i class="fas fa-file-medical"></i></div><div class="stat-value" id="totalAtestadoCard">0</div><div class="stat-label">Atestados</div></div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 28px;">
@@ -611,7 +637,16 @@
                 </table>
             </div>
 
-            <div class="card-header" style="margin-top: 28px;"><h2><i class="fas fa-file-medical"></i> Atestados</h2></div>
+            <div class="card-header" style="margin-top: 28px;"><h2><i class="fas fa-exchange-alt" style="color:var(--gold-bright)"></i> Movimentações do Período</h2><span id="dashMovBadge" class="badge-status">0 registros</span></div>
+            <div style="overflow-x: auto;">
+                <table class="data-table" id="dashMovTable">
+                    <thead><tr><th>Data/Hora</th><th>Quem Saiu</th><th>Quem Entrou</th><th>Posto</th><th>Motivo</th><th>Obs.</th></tr></thead>
+                    <tbody id="dashMovBody"></tbody>
+                    <tfoot id="dashMovFooter"></tfoot>
+                </table>
+            </div>
+
+            <div class="card-header" style="margin-top: 28px;"><h2><i class="fas fa-file-medical" style="color:var(--red-soft)"></i> Atestados</h2></div>
             <div style="overflow-x: auto;">
                 <table class="data-table" id="relatorioAtestadoTable">
                     <thead>
@@ -949,8 +984,8 @@
 
     const motivosSemSubstituto = ["Falta de Efetivo", "Treinamento"];
 
-    // Paleta de cores para os gráficos (tema escuro)
-    const CHART_COLORS = ['#3a74cc','#f7b32b','#10b981','#ef4444','#8b5cf6','#06b6d4','#f59e0b'];
+    // Paleta de cores para os gráficos (tema escuro vibrante)
+    const CHART_COLORS = ['#6366f1','#f59e0b','#10b981','#f43f5e','#a855f7','#06b6d4','#f97316','#fbbf24','#34d399'];
 
     // ── STATUS BADGE ──
     let _isOnline = navigator.onLine;
@@ -1539,6 +1574,34 @@
             if(tfootBico && bicoFiltrados.length) {
                 tfootBico.innerHTML = `<tr style="background:var(--blue-dark);color:#fff;"><td colspan="4" style="text-align:right;font-weight:700;padding:14px 15px;">TOTAL BICO FIXO:</td><td style="font-weight:800;font-size:1rem;padding:14px 15px;color:#34d399;">R$ ${totalBico.toFixed(2)}</td></tr>`;
             } else if(tfootBico) { tfootBico.innerHTML = ""; }
+        }
+
+        /* Tabela Movimentações no dashboard */
+        const empMapMov   = new Map(employees.map(e=>[e.id,e.name]));
+        const postoMapMov = new Map(postos.map(p=>[p.id,p.nome]));
+        let movDash = filtrarPorData(movRecords, 'dataHora');
+        if(postoId)       movDash = movDash.filter(m=>m.postoId===postoId);
+        if(colaboradorId) movDash = movDash.filter(m=>m.quemSaiuId===colaboradorId||m.quemEntrouId===colaboradorId);
+
+        const dashMovBody   = document.getElementById("dashMovBody");
+        const dashMovFooter = document.getElementById("dashMovFooter");
+        const dashMovBadge  = document.getElementById("dashMovBadge");
+        if(dashMovBadge) dashMovBadge.innerHTML = `${movDash.length} registro(s)`;
+        if(dashMovBody) {
+            dashMovBody.innerHTML = movDash.length
+                ? movDash.map(m => `<tr>
+                    <td>${m.dataHora?.replace('T',' ').substring(0,16)||'---'}</td>
+                    <td>${escapeHtml(empMapMov.get(m.quemSaiuId)||'?')} <span style="color:#f43f5e;font-size:0.7rem">(saiu)</span></td>
+                    <td><strong style="color:#34d399">${escapeHtml(empMapMov.get(m.quemEntrouId)||'?')}</strong> <span style="color:#34d399;font-size:0.7rem">(entrou)</span></td>
+                    <td>${escapeHtml(postoMapMov.get(m.postoId)||'?')}</td>
+                    <td><span style="background:rgba(99,102,241,0.15);color:#a5b4fc;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600">${escapeHtml(m.motivo)}</span></td>
+                    <td style="font-size:0.82rem;color:var(--text-sub)">${escapeHtml(m.observacao||'—')}</td>
+                  </tr>`).join('')
+                : '<tr class="empty-row"><td colspan="6">Nenhuma movimentação no período filtrado</td></tr>';
+            if(dashMovFooter && movDash.length) {
+                const totalComFT = movDash.filter(m=>m.ftVinculadaId).length;
+                dashMovFooter.innerHTML = `<tr style="background:rgba(99,102,241,0.15);"><td colspan="4" style="text-align:right;font-weight:700;padding:12px 15px;color:#a5b4fc">TOTAL MOVIMENTAÇÕES:</td><td style="font-weight:800;font-size:1rem;padding:12px 15px;color:#fbbf24">${movDash.length}</td><td style="font-size:0.8rem;color:#34d399;padding:12px 15px">${totalComFT} com FT vinculada</td></tr>`;
+            } else if(dashMovFooter) { dashMovFooter.innerHTML = ""; }
         }
     }
 
