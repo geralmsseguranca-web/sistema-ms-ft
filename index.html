@@ -11,7 +11,9 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import {
         getFirestore, collection, doc, setDoc, deleteDoc,
-        onSnapshot, query, orderBy, getDocs
+        onSnapshot, query, orderBy, getDocs,
+        enableIndexedDbPersistence,
+        enableMultiTabIndexedDbPersistence
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
       // ══════════════════════════════════════════════════
@@ -30,6 +32,20 @@
 
       const app = initializeApp(firebaseConfig);
       const db  = getFirestore(app);
+
+      // ── PERSISTÊNCIA OFFLINE ──
+      // Tenta ativar persistência multi-aba (Chrome/Edge); fallback para aba única
+      enableMultiTabIndexedDbPersistence(db).catch(err => {
+        if (err.code === 'failed-precondition') {
+          // Mais de uma aba aberta — usa persistência de aba única
+          enableIndexedDbPersistence(db).catch(e => {
+            console.warn("Persistência offline não disponível:", e.code);
+          });
+        } else if (err.code === 'unimplemented') {
+          // Navegador não suporta (muito raro em 2024)
+          console.warn("Navegador não suporta persistência offline.");
+        }
+      });
 
       // Expõe db e helpers para o script principal
       window._firestore = {
@@ -131,6 +147,7 @@
         .sync-badge { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.3); }
         .sync-badge.connecting { background: rgba(247,179,43,0.1); color: #f7b32b; border-color: rgba(247,179,43,0.3); animation: pulse 1.5s infinite; }
         .sync-badge.error { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+        .sync-badge.offline { background: rgba(139,93,180,0.15); color: #c084fc; border-color: rgba(139,93,180,0.4); animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
         /* ── TABS ── */
@@ -866,14 +883,31 @@
     const CHART_COLORS = ['#3a74cc','#f7b32b','#10b981','#ef4444','#8b5cf6','#06b6d4','#f59e0b'];
 
     // ── STATUS BADGE ──
+    let _isOnline = navigator.onLine;
+
     function setBadge(state) {
         const b = document.getElementById("firebaseBadge");
         if(!b) return;
-        b.className = "badge-ms sync-badge" + (state === "ok" ? "" : state === "error" ? " error" : " connecting");
-        const icons = { ok:"fa-cloud-upload-alt", error:"fa-exclamation-triangle", connecting:"fa-cloud" };
-        const msgs  = { ok:"Firebase Conectado ✓", error:"Erro de Conexão", connecting:"Conectando…" };
-        b.innerHTML = `<i class="fas ${icons[state]}"></i>&nbsp; ${msgs[state]}`;
+        const classes = { ok:"", error:" error", connecting:" connecting", offline:" offline" };
+        b.className = "badge-ms sync-badge" + (classes[state] || "");
+        const icons = {
+            ok:         "fa-cloud-upload-alt",
+            error:      "fa-exclamation-triangle",
+            connecting: "fa-cloud",
+            offline:    "fa-wifi-slash"
+        };
+        const msgs = {
+            ok:         "Firebase Conectado ✓",
+            error:      "Erro de Conexão",
+            connecting: "Conectando…",
+            offline:    "Offline — dados salvos localmente"
+        };
+        b.innerHTML = `<i class="fas ${icons[state]||'fa-cloud'}"></i>&nbsp; ${msgs[state]||state}`;
     }
+
+    // Monitora conexão de rede
+    window.addEventListener("online",  () => { _isOnline = true;  setBadge("connecting"); setTimeout(()=>setBadge("ok"), 2000); });
+    window.addEventListener("offline", () => { _isOnline = false; setBadge("offline"); });
 
     // ── HELPERS FIRESTORE ──
     function colRef(name) { return FS.collection(db, name); }
@@ -881,15 +915,24 @@
 
     async function fsSet(colName, id, data) {
         try {
+            // Com persistência offline ativa, o setDoc retorna imediatamente
+            // (gravação local) mesmo sem internet — sincroniza depois
             await FS.setDoc(docRef(colName, id), data);
-            setBadge("ok");
-        } catch(e) { console.error("fsSet error:", e); setBadge("error"); }
+            if(_isOnline) setBadge("ok");
+        } catch(e) {
+            console.error("fsSet error:", e);
+            if(_isOnline) setBadge("error");
+        }
     }
 
     async function fsDel(colName, id) {
         try {
             await FS.deleteDoc(docRef(colName, id));
-        } catch(e) { console.error("fsDel error:", e); setBadge("error"); }
+            if(_isOnline) setBadge("ok");
+        } catch(e) {
+            console.error("fsDel error:", e);
+            if(_isOnline) setBadge("error");
+        }
     }
 
     // Recalcula nextId a partir de um array de registros
@@ -939,7 +982,8 @@
             if(cnt) cnt.innerHTML = `${atestadoRecords.length} registro(s)`;
         }));
 
-        setBadge("ok");
+        if(_isOnline) setBadge("ok");
+        else setBadge("offline");
     }
 
     // Compatibilidade: saveAll agora é no-op (Firestore é a fonte de verdade)
@@ -1847,6 +1891,9 @@
         FS = window._firestore;
 
         setBadge("connecting");
+
+        // Se já estiver offline ao carregar, mostra badge correto
+        if(!navigator.onLine) setBadge("offline");
 
         // Inicia listeners de tempo real — eles chamarão render* automaticamente
         startListeners();
