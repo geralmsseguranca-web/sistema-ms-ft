@@ -607,6 +607,7 @@
         <button class="tab-btn" data-tab="tab-bicofixo"><i class="fas fa-user-tie"></i> Bico Fixo</button>
         <button class="tab-btn" data-tab="tab-atestados"><i class="fas fa-file-medical"></i> Atestados</button>
         <button class="tab-btn" data-tab="tab-checklist"><i class="fas fa-clipboard-check"></i> Checklist Supervisor</button>
+        <button class="tab-btn" data-tab="tab-motivos"><i class="fas fa-tags"></i> Motivos</button>
     </div>
 
     <!-- ABA 1 - FOLGA TRABALHADA -->
@@ -1279,6 +1280,50 @@
     <!-- FIM ABA CHECKLIST -->
 </div>
 
+    <!-- ABA MOTIVOS -->
+    <div id="tab-motivos" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-tags"></i> Gerenciar Motivos</h2>
+                <button class="btn-primary" onclick="abrirModalNovoMotivo()"><i class="fas fa-plus"></i> Novo Motivo</button>
+            </div>
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Atenção:</strong> Os motivos cadastrados aqui aparecem nos campos de seleção de <strong>FT</strong> e <strong>Movimentações</strong>.
+                Motivos marcados como <strong>"Sem Substituto"</strong> dispensam o preenchimento do campo "Quem faltou" no formulário de FT.
+            </div>
+
+            <!-- Filtro / busca -->
+            <div class="filter-bar" style="margin-bottom:16px;">
+                <div class="input-group" style="min-width:260px;">
+                    <label><i class="fas fa-search"></i> Buscar Motivo</label>
+                    <input type="text" id="motivoBusca" placeholder="Digite parte do nome…" oninput="renderMotivosTable()">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="document.getElementById('motivoBusca').value='';renderMotivosTable()"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div style="overflow-x:auto;">
+                <table class="data-table" id="motivosTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nome do Motivo</th>
+                            <th style="text-align:center;">Usado em FT</th>
+                            <th style="text-align:center;">Usado em Mov.</th>
+                            <th style="text-align:center;">Sem Substituto</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="motivosTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- FIM ABA MOTIVOS -->
+
 <!-- MODAL PREVIEW FOTO CHECKLIST -->
 <div class="ck-foto-modal-overlay" id="ckFotoModalOverlay" onclick="fecharFotoModal(event)">
     <button class="ck-foto-modal-close" onclick="document.getElementById('ckFotoModalOverlay').classList.remove('open')">
@@ -1300,7 +1345,34 @@
     let db, FS;
     let _unsubscribers = [];
 
-    const motivosSemSubstituto = ["Falta de Efetivo", "Treinamento", "Extra"];
+    // ── MOTIVOS (dinâmicos, sincronizados via Firestore) ──
+    let motivosRecords = [];
+    let nextMotivoId = 1;
+
+    // Motivos padrão (usados caso o Firestore ainda não tenha dados)
+    const MOTIVOS_PADRAO = [
+        { id:1,  nome:"Atestado",              usadoFt:true,  usadoMov:true,  semSubstituto:false },
+        { id:2,  nome:"Cobertura de Férias",   usadoFt:true,  usadoMov:false, semSubstituto:false },
+        { id:3,  nome:"Afastamento",           usadoFt:true,  usadoMov:false, semSubstituto:false },
+        { id:4,  nome:"Falta de Efetivo",      usadoFt:true,  usadoMov:true,  semSubstituto:true  },
+        { id:5,  nome:"Treinamento",           usadoFt:true,  usadoMov:false, semSubstituto:true  },
+        { id:6,  nome:"Remanejamento Interno", usadoFt:true,  usadoMov:true,  semSubstituto:false },
+        { id:7,  nome:"Extra",                 usadoFt:true,  usadoMov:false, semSubstituto:true  },
+        { id:8,  nome:"Folga do Vigia",        usadoFt:true,  usadoMov:true,  semSubstituto:false },
+        { id:9,  nome:"Outro",                 usadoFt:false, usadoMov:true,  semSubstituto:false },
+    ];
+
+    // Getter dinâmico — motivos que dispensam "quem faltou"
+    function getMotivosSemSubstituto() {
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+        return base.filter(m => m.semSubstituto).map(m => m.nome);
+    }
+
+    // Compatibilidade retroativa com código existente que usava a constante
+    let motivosSemSubstituto = getMotivosSemSubstituto();
+    function refreshMotivosSemSubstituto() {
+        motivosSemSubstituto = getMotivosSemSubstituto();
+    }
 
     // Paleta de cores para os gráficos (tema escuro vibrante)
     const CHART_COLORS = ['#6366f1','#f59e0b','#10b981','#f43f5e','#a855f7','#06b6d4','#f97316','#fbbf24','#34d399'];
@@ -1405,6 +1477,20 @@
             if(cnt) cnt.innerHTML = `${atestadoRecords.length} registro(s)`;
         }));
 
+        _unsubscribers.push(sub(colRef("motivosRecords"), snap => {
+            motivosRecords = snap.docs.map(d => d.data());
+            nextMotivoId = calcNext(motivosRecords);
+            // Se Firestore retornou vazio, seed com padrões
+            if (motivosRecords.length === 0) {
+                seedMotivosPadrao();
+            } else {
+                refreshMotivosSemSubstituto();
+                renderMotivosTable();
+                updateMotivoSelects();
+                setupMotivoListener();
+            }
+        }));
+
         if(_isOnline) setBadge("ok");
         else setBadge("offline");
     }
@@ -1438,7 +1524,205 @@
         // Atualiza filtros do dashboard Bico Fixo
         if(typeof updateBicoFiltroSelects === 'function') updateBicoFiltroSelects();
         if(typeof updateBicoMovFiltroSelects === 'function') updateBicoMovFiltroSelects();
+        // Atualiza selects de motivo
+        updateMotivoSelects();
     }
+
+    // ── ATUALIZA OS SELECTS DE MOTIVO ──
+    function updateMotivoSelects() {
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+        const sorted = [...base].sort((a,b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+        const ftHtml  = '<option value="">-- Selecione --</option>' + sorted.filter(m=>m.usadoFt).map(m=>`<option value="${escapeHtml(m.nome)}">${escapeHtml(m.nome)}</option>`).join('');
+        const movHtml = '<option value="">-- Selecione --</option>' + sorted.filter(m=>m.usadoMov).map(m=>`<option value="${escapeHtml(m.nome)}">${escapeHtml(m.nome)}</option>`).join('');
+
+        const ftSel = document.getElementById("motivoSelect");
+        if(ftSel) { const prev = ftSel.value; ftSel.innerHTML = ftHtml; if(prev) ftSel.value = prev; }
+
+        const movSel = document.getElementById("movMotivo");
+        if(movSel) { const prev = movSel.value; movSel.innerHTML = movHtml; if(prev) movSel.value = prev; }
+    }
+
+    // ── SEED MOTIVOS PADRÃO NO FIRESTORE ──
+    async function seedMotivosPadrao() {
+        for(const m of MOTIVOS_PADRAO) {
+            await fsSet("motivosRecords", m.id, m);
+        }
+    }
+
+    // ── RENDERIZA TABELA DE MOTIVOS ──
+    function renderMotivosTable() {
+        const tbody = document.getElementById("motivosTableBody");
+        if(!tbody) return;
+        const busca = (document.getElementById("motivoBusca")?.value || "").toLowerCase();
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+        let lista = [...base].sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'));
+        if(busca) lista = lista.filter(m => m.nome.toLowerCase().includes(busca));
+
+        if(!lista.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum motivo encontrado</td></tr>';
+            return;
+        }
+
+        const check = (val, cor) => val
+            ? `<span style="color:${cor};font-weight:700;font-size:1rem;"><i class="fas fa-check-circle"></i></span>`
+            : `<span style="color:var(--text-dim);font-size:0.9rem;"><i class="fas fa-minus-circle"></i></span>`;
+
+        tbody.innerHTML = lista.map(m => `
+            <tr>
+                <td style="color:var(--text-dim);font-size:0.8rem;">${m.id}</td>
+                <td><strong>${escapeHtml(m.nome)}</strong></td>
+                <td style="text-align:center;">${check(m.usadoFt, 'var(--blue-light)')}</td>
+                <td style="text-align:center;">${check(m.usadoMov, 'var(--cyan)')}</td>
+                <td style="text-align:center;">${check(m.semSubstituto, 'var(--gold)')}</td>
+                <td class="action-icons">
+                    <i class="fas fa-pencil-alt" onclick="editarMotivo(${m.id})" title="Editar motivo" style="color:var(--gold);"></i>
+                    <i class="fas fa-trash-alt" onclick="deletarMotivo(${m.id})" title="Excluir motivo"></i>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // ── ABRIR MODAL NOVO MOTIVO ──
+    window.abrirModalNovoMotivo = function() { abrirModalMotivo(null); };
+
+    // ── ABRIR MODAL EDITAR MOTIVO ──
+    window.editarMotivo = function(id) {
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+        const m = base.find(m => m.id === id);
+        if(m) abrirModalMotivo(m);
+    };
+
+    function abrirModalMotivo(motivo) {
+        const isEdit = !!motivo;
+        const overlay = document.createElement('div');
+        overlay.id = 'motivoModal';
+        overlay.style.cssText = `
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background:rgba(0,0,0,0.78);z-index:9999;
+            display:flex;align-items:center;justify-content:center;
+            backdrop-filter:blur(4px);
+        `;
+        overlay.innerHTML = `
+            <div style="
+                background:var(--bg-card2);border:1px solid var(--border-glow);
+                border-radius:20px;padding:32px 28px;min-width:340px;max-width:480px;
+                width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 0 1px rgba(99,102,241,0.2);
+            ">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+                    <div style="background:rgba(99,102,241,0.15);border-radius:12px;padding:10px;border:1px solid rgba(99,102,241,0.35);">
+                        <i class="fas fa-tags" style="color:var(--blue-light);font-size:1.1rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size:1rem;font-weight:700;color:var(--text-main);">${isEdit ? 'Editar Motivo' : 'Novo Motivo'}</h3>
+                        <p style="font-size:0.78rem;color:var(--text-sub);margin-top:2px;">${isEdit ? 'Altere os dados abaixo' : 'Preencha os dados do novo motivo'}</p>
+                    </div>
+                </div>
+
+                <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-sub);margin-bottom:6px;">Nome do Motivo *</label>
+                <input id="motivoModalNome" type="text" maxlength="80" value="${isEdit ? escapeHtml(motivo.nome) : ''}"
+                    placeholder="Ex: Licença Maternidade"
+                    style="width:100%;background:var(--bg-hover);border:1px solid var(--border-glow);
+                    border-radius:10px;padding:11px 14px;font-size:0.95rem;color:var(--text-main);
+                    font-family:Inter,sans-serif;outline:none;margin-bottom:18px;
+                    box-shadow:0 0 0 3px rgba(99,102,241,0.12);">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px;">
+                    <label style="display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;
+                        background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);
+                        border-radius:12px;padding:14px 10px;transition:background 0.2s;"
+                        onmouseover="this.style.background='rgba(99,102,241,0.18)'" onmouseout="this.style.background='rgba(99,102,241,0.08)'">
+                        <i class="fas fa-calendar-plus" style="color:var(--blue-light);font-size:1.2rem;"></i>
+                        <span style="font-size:0.74rem;font-weight:600;color:var(--text-sub);text-align:center;">Usado em FT</span>
+                        <input type="checkbox" id="motivoModalFt" ${isEdit && motivo.usadoFt ? 'checked' : ''}
+                            style="width:18px;height:18px;accent-color:var(--blue-main);cursor:pointer;">
+                    </label>
+                    <label style="display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;
+                        background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);
+                        border-radius:12px;padding:14px 10px;transition:background 0.2s;"
+                        onmouseover="this.style.background='rgba(6,182,212,0.18)'" onmouseout="this.style.background='rgba(6,182,212,0.08)'">
+                        <i class="fas fa-exchange-alt" style="color:var(--cyan);font-size:1.2rem;"></i>
+                        <span style="font-size:0.74rem;font-weight:600;color:var(--text-sub);text-align:center;">Usado em Mov.</span>
+                        <input type="checkbox" id="motivoModalMov" ${isEdit && motivo.usadoMov ? 'checked' : ''}
+                            style="width:18px;height:18px;accent-color:var(--cyan);cursor:pointer;">
+                    </label>
+                    <label style="display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;
+                        background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);
+                        border-radius:12px;padding:14px 10px;transition:background 0.2s;"
+                        onmouseover="this.style.background='rgba(245,158,11,0.18)'" onmouseout="this.style.background='rgba(245,158,11,0.08)'">
+                        <i class="fas fa-user-slash" style="color:var(--gold);font-size:1.2rem;"></i>
+                        <span style="font-size:0.74rem;font-weight:600;color:var(--text-sub);text-align:center;">Sem Substituto</span>
+                        <input type="checkbox" id="motivoModalSemSub" ${isEdit && motivo.semSubstituto ? 'checked' : ''}
+                            style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+                    </label>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:4px;">
+                    <button onclick="document.getElementById('motivoModal').remove()"
+                        style="flex:1;background:var(--bg-hover);border:1px solid var(--border);
+                        color:var(--text-sub);border-radius:10px;padding:11px;cursor:pointer;
+                        font-family:Inter,sans-serif;font-weight:600;font-size:0.9rem;">
+                        Cancelar
+                    </button>
+                    <button onclick="salvarMotivo(${isEdit ? motivo.id : 'null'})"
+                        style="flex:2;background:linear-gradient(135deg,var(--blue-main),var(--blue-dark));
+                        border:none;color:#fff;border-radius:10px;padding:11px;cursor:pointer;
+                        font-family:Inter,sans-serif;font-weight:700;font-size:0.9rem;
+                        box-shadow:0 4px 14px rgba(99,102,241,0.35);">
+                        <i class="fas fa-save" style="margin-right:7px;"></i>${isEdit ? 'Salvar Alteração' : 'Adicionar Motivo'}
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+        setTimeout(() => document.getElementById('motivoModalNome')?.focus(), 50);
+    }
+
+    window.salvarMotivo = async function(id) {
+        const nome = document.getElementById('motivoModalNome')?.value?.trim();
+        if(!nome) { alert("Informe o nome do motivo!"); return; }
+
+        const usadoFt      = document.getElementById('motivoModalFt')?.checked   || false;
+        const usadoMov     = document.getElementById('motivoModalMov')?.checked  || false;
+        const semSubstituto = document.getElementById('motivoModalSemSub')?.checked || false;
+
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+
+        if(id === null) {
+            // Novo motivo
+            const duplo = base.find(m => m.nome.toLowerCase() === nome.toLowerCase());
+            if(duplo) { alert("Já existe um motivo com esse nome!"); return; }
+            const novo = { id: nextMotivoId++, nome, usadoFt, usadoMov, semSubstituto };
+            await fsSet("motivosRecords", novo.id, novo);
+        } else {
+            // Editar existente
+            const m = base.find(m => m.id === id);
+            if(!m) return;
+            const duplo = base.find(m2 => m2.nome.toLowerCase() === nome.toLowerCase() && m2.id !== id);
+            if(duplo) { alert("Já existe outro motivo com esse nome!"); return; }
+            Object.assign(m, { nome, usadoFt, usadoMov, semSubstituto });
+            await fsSet("motivosRecords", m.id, m);
+        }
+
+        document.getElementById('motivoModal')?.remove();
+    };
+
+    window.deletarMotivo = async function(id) {
+        const base = motivosRecords.length ? motivosRecords : MOTIVOS_PADRAO;
+        const m = base.find(m => m.id === id);
+        if(!m) return;
+
+        // Verifica se motivo está em uso
+        const emUso = ftRecords.some(f => f.motivo === m.nome) || movRecords.some(v => v.motivo === m.nome);
+        if(emUso) {
+            alert(`❌ O motivo "${m.nome}" está em uso em FTs ou Movimentações e não pode ser excluído.`);
+            return;
+        }
+
+        if(!confirm(`Excluir o motivo "${m.nome}"?`)) return;
+        await fsDel("motivosRecords", id);
+    };
 
     function setupMotivoListener() {
         const motivoSelect = document.getElementById("motivoSelect");
@@ -2285,6 +2569,7 @@
                 else if(tab==="tab-atestados") { updateAtestadoSelect(); updateAtestadoFilterColaborador(); renderAtestadoTable(); resetAtestadoForm(); }
                 else if(tab==="tab-employees") { renderEmployeeTable(); }
                 else if(tab==="tab-postos") { renderPostoTable(); }
+                else if(tab==="tab-motivos") { renderMotivosTable(); }
             });
         });
     }
